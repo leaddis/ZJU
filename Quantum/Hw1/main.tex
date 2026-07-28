@@ -1,0 +1,321 @@
+\documentclass[a4paper]{article}
+\usepackage[affil-it]{authblk}
+\usepackage[english]{babel}
+\usepackage[backend=bibtex,style=numeric]{biblatex}
+
+\usepackage{geometry}
+\geometry{margin=1.5cm, vmargin={0pt,1cm}}
+\setlength{\topmargin}{-1cm}
+\setlength{\paperheight}{29.7cm}
+\setlength{\textheight}{25.3cm}
+
+% useful packages.
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}     
+\usepackage{enumerate} %enumerate environment
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{fancyhdr}
+\usepackage{layout}
+\usepackage{ctex}      %中文环境
+\usepackage{booktabs}  %三线表
+\usepackage{verbatim}  %comment environment
+\usepackage{float}     %强制表格图片位置
+\usepackage{listings}  %insert code in latex
+\usepackage{fontspec}  %font support
+\usepackage{tikz}
+\usepackage{makecell}
+\usetikzlibrary{intersections}
+\usepackage{arydshln}
+
+\usepackage[colorlinks,linkcolor=blue]{hyperref}
+\usepackage{xcolor}
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{lightgrey}{rgb}{0.95,0.95,0.95}
+\definecolor{winered}{rgb}{0.5,0,0}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\lstset{
+      backgroundcolor=\color{lightgrey},
+      basicstyle             = \ttfamily,
+      breakatwhitespace      = false,
+      breaklines             = true,
+      captionpos             = none,
+      commentstyle           = \color{mygreen}\bfseries,
+      extendedchars          = false,
+      keepspaces             = true,
+      keywordstyle           = \color{winered},         % keyword style
+      language               = C++,                     % the language of code
+      otherkeywords          = {string},
+      numberstyle            = \tiny\color{mygray},
+      rulecolor              = \color{black},
+      showspaces             = false,
+      showstringspaces       = false,
+      showtabs               = false,
+      stepnumber             = 1,
+      stringstyle            = \color{mymauve},         % string literal style
+      tabsize                = 2,
+      title                  = \lstname,
+      aboveskip              = 0pt,
+      belowskip              = 0pt,
+      columns                = flexible
+}
+
+% some common command
+\newcommand{\dif}{\mathrm{d}}
+\newcommand{\avg}[1]{\left\langle #1 \right\rangle}
+\newcommand{\norm}[1]{\left\| #1 \right\|}
+\newcommand{\difFrac}[2]{\frac{\dif #1}{\dif #2}}
+\newcommand{\pdfFrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\OFL}{\mathrm{OFL}}
+\newcommand{\UFL}{\mathrm{UFL}}
+\newcommand{\fl}{\mathrm{fl}}
+\newcommand{\op}{\odot}
+\newcommand{\Eabs}{E_{\mathrm{abs}}}
+\newcommand{\Erel}{E_{\mathrm{rel}}}
+\addbibresource{citation.bib}
+
+\begin{document}
+% =================================================
+\title{Quantum information and quantum computation homework 1}
+
+\author{Zhouyue Qian 3220104074
+  \thanks{Electronic address: \texttt{3220104074@edu.zju.cn}}}
+\affil{(Information and Computational Science Class 2201), Zhejiang University }
+
+
+\date{Due time: \today}
+
+\maketitle
+
+%\begin{abstract}
+%    The abstract is not necessary for the theoretical homework, 
+%    but for the programming project, 
+%    you are encouraged to write one.      
+%\end{abstract}
+
+
+
+
+
+% ============================================
+\section{Turing Machine 1}
+I have built a Turing machine that can reserve the input string. It can reverse the input composed of "0"s and "1"s, similar to how "1001" would become "0110".
+\subsection{\textbf{Design}}
+
+
+
+\subsubsection{Symbols and States}
+
+\begin{itemize}
+    \item \textbf{External Alphabet \( A \)}: \(\{0, 1\}\)
+    \item \textbf{Tape Alphabet \( S \)}: \(\{\textunderscore, 0, 1, *\}\), where \(*\) is an auxiliary marker.
+    \item \textbf{State Set \( Q \)}: \(\{q_0, q_f, r, l, q_{Swap}, q_{Back}, q_{Skip}\}\), where:
+    \begin{itemize}
+        \item \( r \) indicates moving right.
+        \item \( l \) indicates moving left.
+        \item \( q_{Swap} \) indicates the swapping phase.
+        \item \( q_{Back} \) indicates returning to the leftmost position after swapping.
+        \item \( q_{Skip} \) indicates skipping consecutive blanks.
+        \item \( q_f \) is the final state.
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Transition Function}
+
+\begin{enumerate}
+    \item \textbf{Initial Phase (\( q_0 \))}: Mark the leftmost symbol and prepare to move right to find the rightmost symbol.
+    \begin{align*}
+        (q_0, 0) &\rightarrow (r, *, +1) \\
+        (q_0, 1) &\rightarrow (r, *, +1) \\
+        (q_0, \textunderscore) &\rightarrow (q_{Skip}, \textunderscore, +1)
+    \end{align*}
+
+    \item \textbf{Skipping Consecutive Blanks (\( q_{Skip} \))}: Skip consecutive blanks until a non-blank symbol is found.
+    \begin{align*}
+        (q_{Skip}, \textunderscore) &\rightarrow (q_{Skip}, \textunderscore, +1) \\
+        (q_{Skip}, 0) &\rightarrow (r, 0, +1) \\
+        (q_{Skip}, 1) &\rightarrow (r, 1, +1)
+    \end{align*}
+
+    \item \textbf{Moving Right (\( r \))}: Find the rightmost unprocessed symbol.
+    \begin{align*}
+        (r, 0) &\rightarrow (r, 0, +1) \\
+        (r, 1) &\rightarrow (r, 1, +1) \\
+        (r, \textunderscore) &\rightarrow (q_{Swap}, \textunderscore, -1)
+    \end{align*}
+
+    \item \textbf{Swapping Phase (\( q_{Swap} \))}: Move left to find the marker \(*\) and perform the symbol swap.
+    \begin{align*}
+        (q_{Swap}, 0) &\rightarrow (q_{Swap}, 0, -1) \\
+        (q_{Swap}, 1) &\rightarrow (q_{Swap}, 1, -1) \\
+        (q_{Swap}, *) &\rightarrow (q_{Back}, \textunderscore, +1)
+    \end{align*}
+
+    \item \textbf{Returning to the Start (\( q_{Back} \))}: Return to the leftmost position to process the next symbol.
+    \begin{align*}
+        (q_{Back}, 0) &\rightarrow (q_{Back}, 0, +1) \\
+        (q_{Back}, 1) &\rightarrow (q_{Back}, 1, +1) \\
+        (q_{Back}, *) &\rightarrow (r, *, +1)
+    \end{align*}
+
+    \item \textbf{Final State (\( q_f \))}: When all symbols are processed, stop.
+    \begin{align*}
+        (r, *) &\rightarrow (q_f, *, 0)
+    \end{align*}
+\end{enumerate}
+
+\subsection{Advanced Analysis}
+DThis Turing machine that can reverse an input binary string and handle consecutive blank spaces.
+\subsubsection{Time Complexity}
+
+\begin{itemize}
+    \item \textbf{Initial Phase (\( q_0 \))}: \( O(1) \)
+    \item \textbf{Moving Right (\( r \))}: \( O(n) \)
+    \item \textbf{Swapping Phase (\( q_{Swap} \))}: \( O(n) \)
+    \item \textbf{Returning to the Start (\( q_{Back} \))}: \( O(n) \)
+    \item \textbf{Final State (\( q_f \))}: \( O(1) \)
+\end{itemize}
+
+\textbf{Total Time Complexity}: \( O(n^2) \), where \( n \) is the length of the input string.
+
+\subsubsection{Space Complexity}
+
+\begin{itemize}
+    \item \textbf{Initial Phase (\( q_0 \))}: \( O(1) \)
+    \item \textbf{Moving Right (\( r \))}: \( O(1) \)
+    \item \textbf{Swapping Phase (\( q_{Swap} \))}: \( O(1) \)
+    \item \textbf{Returning to the Start (\( q_{Back} \))}: \( O(1) \)
+    \item \textbf{Final State (\( q_f \))}: \( O(1) \)
+\end{itemize}
+
+\textbf{Total Space Complexity}: \( O(n) \), where \( n \) is the length of the input string.
+
+\section{Turing Machine 2}
+This Turing machine can adds two numbers written in binary. 
+\subsection{States}
+\begin{itemize}
+    \item $q_0$: Initial state. Reads the input and identifies two binary numbers separated by a delimiter "+". 
+    \item $q_1$: Scanning the first binary number. 
+    \item $q_2$: Carrying out the addition of corresponding bits from the two numbers.
+    \item $q_3$: Writing the result and handling the carry.
+    \item $q_4$: Final carry handling.
+    \item $q_f$: Final state after completion.
+\end{itemize}
+
+\subsection{External Alphabet}
+\begin{itemize}
+    \item $0, 1$: Binary digits.
+    \item $+$: Delimiter separating two numbers.
+    \item $\_ $: Blank symbol.
+\end{itemize}
+
+\subsection{State Transition Function}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+    \hline
+    \textbf{Current State} & \textbf{Read Symbol} & \textbf{Write Symbol} & \textbf{Move Direction} & \textbf{Next State} \\ \hline
+    $q_0$ & 0 & 0 & R & $q_0$ \\ \hline
+    $q_0$ & 1 & 1 & R & $q_0$ \\ \hline
+    $q_0$ & + & + & R & $q_1$ \\ \hline
+    $q_1$ & 0 & 0 & R & $q_1$ \\ \hline
+    $q_1$ & 1 & 1 & R & $q_1$ \\ \hline
+    $q_1$ & $\_$ & $\_$ & L & $q_2$ \\ \hline
+    $q_2$ & 0 (no carry) & 0 & L & $q_3$ \\ \hline
+    $q_2$ & 1 (no carry) & 1 & L & $q_3$ \\ \hline
+    $q_2$ & 1 + 1 (no carry) & 0 & L & $q_3$ (carry) \\ \hline
+    $q_3$ & 0 & 0 & L & $q_3$ \\ \hline
+    $q_3$ & 1 & 1 & L & $q_3$ \\ \hline
+    $q_3$ & + & + & L & $q_4$ \\ \hline
+    $q_4$ & No carry & $\_$ & - & $q_f$ \\ \hline
+    $q_4$ & Carry & 1 & L & $q_f$ \\ \hline
+\end{tabular}
+\caption{State Transition Table for Binary Addition}
+\end{table} 
+
+\subsection{Explanation of the Process}
+
+1. In the initial state $q_0$, the Turing Machine scans the first binary number and stops when it encounters the "+" delimiter.
+2. Once the "+" symbol is detected, the machine enters state $q_1$ and begins searching for the rightmost bit of the second binary number.
+3. In state $q_2$, the machine adds the binary digits bit by bit, starting from the rightmost bit of both numbers.
+4. The machine handles carry bits accordingly. If there is a carry after adding the bits, it enters state $q_3$ to continue the process.
+5. In state $q_3$, the machine writes the result and moves left to handle the next bit or the carry.
+6. If a final carry exists after all bits have been processed, the machine enters state $q_4$ and writes the carry before reaching the final state $q_f$.
+7. The Turing Machine halts in state $q_f$ once all operations are complete. 
+
+\subsection{Example: Adding 101 + 11}
+
+For the input "101+11", the Turing Machine will proceed as follows:
+
+\begin{itemize}
+    \item Initial state $q_0$: Read "101", then encounter "+" and move to state $q_1$.
+    \item State $q_1$: Start reading "11" from right to left.
+    \item State $q_2$: Perform the addition:
+    \begin{itemize}
+        \item $1 + 1 = 10$: Write 0, carry 1.
+        \item $0 + 1 + 1 = 10$: Write 0, carry 1.
+        \item $1 + 0 + 1 = 10$: Write 0, carry 1.
+    \end{itemize}
+    \item State $q_4$: Write the final carry, resulting in "1000".
+\end{itemize}
+
+Thus, the binary addition of 101 and 11 yields the result 1000 (which equals 8 in decimal).
+
+\section{Turing Machine proof}
+\subsection{Basic Idea of the Simulation}
+
+The basic idea of simulating a 2-tape Turing Machine \( M_2 \) with a single-tape Turing Machine \( M_1 \) involves encoding the two tapes of \( M_2 \) on a single tape of \( M_1 \). To do this, we need to:
+\begin{itemize}
+    \item Use an expanded alphabet for \( M_1 \) that can encode the symbols on both tapes of \( M_2 \), along with markers for the head positions.
+    \item Simulate each step of \( M_2 \) by scanning the entire tape of \( M_1 \) to find the head positions, reading the symbols under each head, and then updating the tape according to the transition function of \( M_2 \).
+\end{itemize}
+
+\subsubsection{1-Tape Alphabet}
+The alphabet of \( M_1 \) must be large enough to encode the symbols of both tapes of \( M_2 \). Let \( \Sigma \) be the alphabet of \( M_2 \), including the blank symbol \( \_\_ \). Then, each cell of \( M_1 \)'s tape must encode:
+\begin{itemize}
+    \item A symbol from \( \Sigma \) for tape 1 of \( M_2 \).
+    \item A symbol from \( \Sigma \) for tape 2 of \( M_2 \).
+    \item Two additional bits to mark the head positions on each of the two tapes.
+\end{itemize}
+Thus, the alphabet of \( M_1 \) is \( \Sigma^2 \times \{0, 1\}^2 \), which includes all possible combinations of symbols from both tapes and head markers.
+
+\subsubsection{Initial Configuration}
+Initially, the input on the first tape of \( M_2 \) is encoded on the single tape of \( M_1 \). The second tape of \( M_2 \) is initialized to be blank. The head positions of both tapes of \( M_2 \) are marked in the encoding on the single tape of \( M_1 \).
+
+\subsection{Simulation Process}
+
+The simulation proceeds by simulating each step of \( M_2 \) in two phases:
+\begin{enumerate}
+    \item A left-to-right scan of the tape to locate the head positions and read the symbols under both heads of \( M_2 \).
+    \item A right-to-left scan to perform the actions dictated by the transition function of \( M_2 \) (write symbols and move the heads).
+\end{enumerate}
+
+\subsubsection{Phase 1: Left-to-Right Scan}
+In this phase, \( M_1 \) performs a left-to-right scan of the entire tape to find the head positions of both tapes of \( M_2 \). During this scan, \( M_1 \) stores the symbols found under the heads of \( M_2 \) in its finite control. This takes \( O(s) \) steps, where \( s \) is the length of the portion of the tape that contains non-blank symbols.
+
+\subsubsection{Phase 2: Right-to-Left Scan}
+After reading the symbols under both heads in Phase 1, \( M_1 \) performs a right-to-left scan of the tape. During this scan, \( M_1 \) updates the symbols on the tape according to the transition function of \( M_2 \), moves the head markers, and performs any necessary write operations. This also takes \( O(s) \) steps.
+
+Since each phase takes \( O(s) \) steps, the total time for simulating one step of \( M_2 \) is \( O(s) \).
+
+\subsection{Time Complexity Analysis}
+
+\subsubsection{Tape Length}
+Let \( s \) denote the length of the portion of the tape used by \( M_2 \). In the worst case, the tape length grows with the number of steps \( T(n) \), so \( s \leq T(n) + 1 \).
+
+\subsubsection{Total Time Complexity}
+Each simulated step of \( M_2 \) requires \( O(s) \) steps by \( M_1 \). Since \( M_2 \) runs for \( T(n) \) steps, the total time required by \( M_1 \) to simulate all steps of \( M_2 \) is:
+\[
+O(s \cdot T(n)) = O(T(n) \cdot T(n)) = O(T(n)^2).
+\]
+Thus, the total time complexity of simulating a 2-tape Turing Machine with a single-tape Turing Machine is \( O(T(n)^2) \).  \hfill $\Box$
+
+% ===============================================
+%\section*{ \center{\normalsize {Acknowledgement}} }
+%\printbibliography
+
+
+\end{document}

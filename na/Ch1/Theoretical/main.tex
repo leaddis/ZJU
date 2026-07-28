@@ -1,0 +1,287 @@
+\documentclass[a4paper]{article}
+\usepackage[affil-it]{authblk}
+\usepackage[english]{babel}
+\usepackage[backend=bibtex,style=numeric]{biblatex}
+
+\usepackage{geometry}
+\geometry{margin=1.5cm, vmargin={0pt,1cm}}
+\setlength{\topmargin}{-1cm}
+\setlength{\paperheight}{29.7cm}
+\setlength{\textheight}{25.3cm}
+
+% useful packages.
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}     
+\usepackage{enumerate} %enumerate environment
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{fancyhdr}
+\usepackage{layout}
+\usepackage{ctex}      %中文环境
+\usepackage{booktabs}  %三线表
+\usepackage{verbatim}  %comment environment
+\usepackage{float}     %强制表格图片位置
+\usepackage{listings}  %insert code in latex
+\usepackage{fontspec}  %font support
+\usepackage{tikz}
+\usepackage{makecell}
+\usetikzlibrary{intersections}
+\usepackage{arydshln}
+
+\usepackage[colorlinks,linkcolor=blue]{hyperref}
+\usepackage{xcolor}
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{lightgrey}{rgb}{0.95,0.95,0.95}
+\definecolor{winered}{rgb}{0.5,0,0}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\lstset{
+      backgroundcolor=\color{lightgrey},
+      basicstyle             = \ttfamily,
+      breakatwhitespace      = false,
+      breaklines             = true,
+      captionpos             = none,
+      commentstyle           = \color{mygreen}\bfseries,
+      extendedchars          = false,
+      keepspaces             = true,
+      keywordstyle           = \color{winered},         % keyword style
+      language               = C++,                     % the language of code
+      otherkeywords          = {string},
+      numberstyle            = \tiny\color{mygray},
+      rulecolor              = \color{black},
+      showspaces             = false,
+      showstringspaces       = false,
+      showtabs               = false,
+      stepnumber             = 1,
+      stringstyle            = \color{mymauve},         % string literal style
+      tabsize                = 2,
+      title                  = \lstname,
+      aboveskip              = 0pt,
+      belowskip              = 0pt,
+      columns                = flexible
+}
+
+% some common command
+\newcommand{\dif}{\mathrm{d}}
+\newcommand{\avg}[1]{\left\langle #1 \right\rangle}
+\newcommand{\norm}[1]{\left\| #1 \right\|}
+\newcommand{\difFrac}[2]{\frac{\dif #1}{\dif #2}}
+\newcommand{\pdfFrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\OFL}{\mathrm{OFL}}
+\newcommand{\UFL}{\mathrm{UFL}}
+\newcommand{\fl}{\mathrm{fl}}
+\newcommand{\op}{\odot}
+\newcommand{\Eabs}{E_{\mathrm{abs}}}
+\newcommand{\Erel}{E_{\mathrm{rel}}}
+\addbibresource{citation.bib}
+
+\begin{document}
+% =================================================
+\title{Numerical Analysis chapter 1 theoretical homework}
+
+\author{Zhouyue Qian 3220104074
+  \thanks{Electronic address: \texttt{3220104074@edu.zju.cn}}}
+\affil{(Information and Computational Science Class 2201), Zhejiang University }
+
+
+\date{Due time: \today}
+
+\maketitle
+
+%\begin{abstract}
+%    The abstract is not necessary for the theoretical homework, 
+%    but for the programming project, 
+%    you are encouraged to write one.      
+%\end{abstract}
+
+
+
+
+
+% ============================================
+\section*{I}
+\subsection*{I-question}
+Consider the bisection method starting with the initial interval $[1.5, 3.5]$. In the following questions “the
+interval” refers to the bisection interval whose width
+changes across different loops.
+\begin{itemize}
+    \item What is the width of the interval at the $n$th step?
+    \item What is the supremum of the distance betweenthe root $r$ and the midpoint of the interval?
+\end{itemize}
+\subsection*{I-a}
+
+%Give your answers here....\cite{Zhang2020BooleanAO}
+If the initial width of the interval is $w$, then the width of the interval at the nth step will be $w_n = \frac{w}{2^n}=\frac{1}{2^{n-1}}$.
+
+\subsection*{I-b}
+This is determined by the initial width of the interval and is equal to $\frac{3.5-1.5}{2}=1$
+
+at the very beginning, which is 1. This value will decrease as the bisection method narrows down the interval.
+
+
+\section*{II}
+\subsection*{II-question}
+In using the bisection algorithm with its initial interval as $[a_0, b_0]$ with $a_0 > 0$, we want to determine the root
+with its $relative$ error no greater than $\epsilon $. Prove that this goal of accuracy is guaranteed by the following choice 
+of the number of steps,$$n \geq \frac{log(b_0-a_0)-log\epsilon -log(a_0)}{log2} -1$$
+
+\subsection*{proof}
+
+As we all know, the $relative$ error $\eta = \frac{|r - c|}{|r|} $,where $r$ is the true root, and $c$ is the approximate root found by the algorithm. 
+The relative error being no greater than $\epsilon$ means that $\eta \leq \epsilon$, which equals to $|r - c| \leq \epsilon |r|$.
+Also, we have already learnt that the width of the interval at the $n$th step is  $ \frac{b_0 - a_0}{2^{n+1}}$, where $n$ is the number of steps.
+Therefore, we have $\frac{b_0 - a_0}{2^n}\leq|r - c| \leq \epsilon |r|  $Assuming $|r|=a_0$ (Since $a_0$ is a reasonable initial estimate), we have:
+$$\frac{b_0 - a_0}{2^{n+1}}\leq|r - c| \leq \epsilon a_0$$
+$$\frac{b_0 - a_0}{2^{n+1}}\leq \epsilon a_0$$
+So we have: 
+$$n \geq \frac{log(b_0-a_0)-log\epsilon -log(a_0)}{log2} -1$$ 
+The proof is completed.  $\Box$ 
+
+\section*{III}
+\subsection*{III-question}
+Perform four iterations of Newton's method for the
+polynomial equation $p(x) = 4x^{3}-2x^{2}+3 = 0$ with
+the starting point $x_0 = −1$. Use a hand calculator and
+organize results of the iterations in a table.
+
+\subsection*{III-answer}
+The derivative of $p(x)$ is $p'(x) = 12x^{2}-4x$. The Newton's method iteration formula is:
+$$x_{n+1} = x_n - \frac{p(x_n)}{p'(x_n)}$$
+\begin{table}[ht]
+  \centering
+  \begin{tabular}{|c|c|}
+  \hline
+  Iteration & Value of $x_n$ \\ \hline
+  $x_1$ & -0.8125    \\ \hline
+  $x_2$ & -0.770804  \\ \hline
+  $x_3$ & -0.768832  \\ \hline
+  $x_4$ & -0.768828  \\ \hline
+  \end{tabular}
+  \caption{Iterations of $x_n$}
+  \label{table:iterations}
+  \end{table}
+The answer was generated by $Python$ which helped by AI. \cite{kimiassistant}
+
+\section*{IV}
+\subsection*{IV-question}
+Consider a variation of Newton's method in which only the derivative at $x_0$ is used,$$x_{n+1} = x_n - \frac{f(x_n)}{f'(x_0)}$$
+Find $C$ and $s$ such that $$e_{n+1} = C(e_n)^s$$ where $e_n$ is the error of Newton's method at step n, s is
+a constant, and C may depend on $x_n$, the true solution $\alpha$ , and the derivative of the function $f$.
+
+\subsection*{IV-answer}
+\begin{itemize}
+  \item $Taylor \, Expansion$
+    $$f(x) = f(x) + f'(\alpha )(x - \alpha ) + \frac{f''(\alpha )}{2!}(x - \alpha )^2 + \cdots$$
+    Since \(f(\alpha) = 0\), we have:
+    $$ f(x_n) = f'(\alpha)(x_n - \alpha) + \frac{f''(\alpha)}{2}(x_n - \alpha)^2 + \cdots $$
+    $$ f(x_n) \approx f'(\alpha)(x_n - \alpha) + \frac{f''(\alpha)}{2}(x_n - \alpha)^2 $$
+  \item $Error \; in \; Iteration \; Formula$
+    $$ x_{n+1} = x_n - \frac{f(x_n)}{f'(x_0)} $$
+    $$ x_{n+1} = x_n - \frac{f'(\alpha)(x_n - \alpha) + \frac{f''(\alpha)}{2}(x_n - \alpha)^2}{f'(x_0)} $$
+    $$ x_{n+1} - \alpha = x_n - \alpha - \frac{f'(\alpha)(x_n - \alpha)}{f'(x_0)} $$
+    $$ e_{n+1} = e_n - \frac{f'(\alpha) e_n}{f'(x_0)} $$
+  \item $calculate$
+    $$ e_{n+1} = (1 - \frac{f'(\alpha)}{f'(x_0)} ) e_n $$
+    So, we could know that $C = 1 - \frac{f'(\alpha)}{f'(x_0)} $ and $s = 1$
+\end{itemize}
+
+\section*{V}
+\subsection*{V-question}
+Within $(-\frac{\pi }{2},\frac{\pi }{2})$, will the iteration $x_{n+1} = tan^{-1} x_n$ converge?
+
+\subsection*{V-answer}
+First, we note that the function \(\arctan(x)\) is the inverse tangent function, and its derivative is given by:
+\[
+\frac{d}{dx} \arctan(x) = \frac{1}{1+x^2}
+\]
+This derivative is always less than 1 for all \(x\) in the interval \((-\frac{\pi}{2}, \frac{\pi}{2})\), i.e.,
+\[
+\left|\frac{1}{1+x^2}\right| < 1
+\]
+According to $Contraction \; Mapping \; Theorem$ we could learn that $x_{n+1} = tan^{-1} x_n$ is converge and the fixed point is $(0,0)$.
+
+\section*{VI}
+\subsection*{VI-question}
+Let \( p > 1 \). What is the value of the following continued fraction?
+\[
+x =  \cfrac{1}{p + \cfrac{1}{p  + \cfrac{1}{p + \cdots}}}
+\]
+Prove that the sequence of values converges. (Hint: this can be interpreted as \( x = \lim_{n \to \infty} x_n \), where
+\[
+x_1 = \frac{1}{p}, \quad x_2 = \frac{1}{p + \frac{1}{p}}, \quad x_3 = \frac{1}{p + \frac{1}{p+\frac{1}{p}}}, \quad \ldots, \quad \text{and so forth.}
+\]
+Formulate \( x \) as a fixed point of some function.)
+\subsection*{VI-answer}
+This continued fraction can be written as: $f(x) = \frac{1}{p+x}$; $x = f(x)$, which is a fixed point of the function $f(x)$. 
+It is obvious that $\forall i,{x_i}>0$
+The derivative of $f(x)$ is:
+$$f'(x) = -(p+x)^{-2}<0$$ Since $p>1,x_1 = \frac{1}{p}<1$,
+so we have $x_{n+1}<x_n<1$, which make sure that $|f'(x)<\frac{1}{p^{2}}<1|$,
+so the sequence of values converges.
+
+\section*{VII}
+\subsection*{VII-question}
+
+What happens in $problem II$ if $a_0 < 0 < b_0$? Derive
+an inequality of the number of steps similar to that in
+$II$. In this case, is the relative error still an appropriate
+measure?
+
+\subsection*{VII-answer}
+Same as $problem II$, we have: the $relative$ error $\eta = \frac{|r - c|}{|r|} $,where $r$ is the true root, and $c$ is the approximate root found by the algorithm. 
+We assume that $\alpha $ is the true root,$\epsilon $ is error, and $x_n$ is the approximate root found by the algorithm.
+Also from $problem I$, we have:$x_n-\alpha \leq  \frac{|b_0 - a_0|}{2^{n+1}}$, for $\eta < \epsilon $ so we have:
+$$\frac{|b_0 - a_0|}{2^{n+1}*|\alpha |} \leq \epsilon $$
+$$ n \geq \frac{log(b_0-a_0)-log\epsilon -log(|\alpha |)}{log2} -1$$
+The relative error cannot be an appropriate measure, since the estimate of $n$ in this expression depends on $\alpha $ .
+So,we should use the absolute error instead of the relative error.
+
+\section*{VIII}
+\subsection*{VIII-question}
+$(*)$ Consider solving $f(x) = 0 (f ∈ C^{k+1})$ by Newton's
+method with the starting point x0 close to a root of
+multiplicity k. Note that $\alpha$  is a zero of multiplicity $k$
+of the function $f$ if
+$$f^{(k)}\neq 0; \forall i< k, f^{(i)}(\alpha ) = 0$$
+\begin{itemize}
+    \item How can a multiple zero be detected by examining
+    the behavior of the points (xn, f(xn))?
+    \item Prove that if r is a zero of multiplicity k of the
+    function f, then quadratic convergence in Newton's iteration will be restored by making this
+    modification:
+    $$x_{n+1}=x_{n}-k\frac{f(x_n)}{f'(x_n)}$$
+\end{itemize}
+
+\subsection*{VIII-answer}
+\subsubsection*{question1}
+Because $\alpha $ is a zero of multiplicity $k$ of the function $f$, we assume that $f(x)= (x - \alpha )^{k}g(x)$ and $g(\alpha )\neq 0 $
+From the Newton's method iteration formula, we have:
+$$x_{n+1}= x_{n}- \frac{f(x_n)}{f'(x_{n})}$$
+$$x_{n+1}-\alpha = x_{n}-\alpha - \frac{f(x_n)}{f'(x_{n})}$$
+$$x_{n+1}-\alpha = (x_{n}-\alpha)-\frac{(x_{n}-\alpha)g(x_n)}{kg(x_n)+(x_n-\alpha)g'(x_n)}$$
+Now we assume $e_{i}=x_{i}-\alpha$, and we have:
+$$\frac{e_{n+1} }{e_{n}}=1-\frac{g(x_n)}{kg(x_n)+e_{n}g'(x_n)}$$
+Let's take the limit on both sides of the equation.
+$$\lim_{n \to \infty}\frac{e_{n+1} }{e_{n}}=1 -\frac{1}{k}$$
+As we know, the convergence rate of Newton's method is quadratic, and in this case, the convergence rate is linear.
+So when used Newton's method, we find the convergence rate is linear, we can know that the root is a multiple zero of the function $f$.
+(This method is inspired by AI.)\cite{openai2024chatgpt}
+
+\subsubsection*{question2}
+similarly, we assume that $f(x)= (x - \alpha  )^{k}g(x)$ and $g(\alpha )\neq 0 $  
+$$x_{n+1} - \alpha  = x_n -\alpha - k \frac{(x_{n}-\alpha)g(x_n)}{kg(x_n)+(x_n-\alpha)g'(x_n)}$$
+$$x_{n+1} - \alpha = (x_n -\alpha)[1 - k \frac{g(x_n)}{kg(x_n)+(x_n-\alpha)g'(x_n)}]$$
+$$e_{n+1}=e_{n}^{2}\frac{g'(x_n)}{kg(x_n)+e_{n}g'(x_n)}$$
+$$\lim_{n \to \infty}|\frac{e_{n+1} }{e_{n}^{2}}|=\lim_{n \to \infty}|\frac{g'(x_n)}{kg(x_n)+e_{n}g'(x_n)}|$$
+And we know that $e_n \rightarrow 0$ and $x_{n}\rightarrow \alpha $, so we have:
+$$\lim_{n \to \infty}|\frac{e_{n+1} }{e_{n}^{2}}|=|\frac{g'(\alpha )}{kg(\alpha )}|$$
+and we know that $g(\alpha )\neq 0$ and $g'(\alpha )$ is a const number, so we have proved that the convergence rate is quadratic. $\Box $
+
+
+% ===============================================
+\section*{ \center{\normalsize {Acknowledgement}} }
+\printbibliography
+
+
+\end{document}

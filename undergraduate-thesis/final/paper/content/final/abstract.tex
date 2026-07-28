@@ -1,0 +1,17 @@
+\cleardoublestylepage{previous}
+\begin{center}
+    \bfseries \zihao{3} 摘要
+\end{center}
+
+为了解决参数化偏微分方程在多查询场景下有限元求解成本过高的问题，本文将增量奇异值分解（ISVD）应用于模型降阶.在梳理加权内积下core SVD理论的基础上，针对经典Brand增量算法在长序列更新中因舍入误差累积导致的正交性退化，复现了Zhang (2022)的改进算法.该算法通过累积更新策略避免小正交矩阵的连续乘积，从机制上消除了频繁重正交化的必要性.在一维和二维参数化椭圆型PDE上的数值实验表明，改进的ISVD能够长期保持加权正交性，逼近精度与批次POD相当，同时峰值内存压缩一个数量级以上，离线时间显著缩短.本文为大规模参数化PDE的高效降阶提供了一种兼具数值稳定性与计算效率的可行方案.
+\vspace{1em}
+\par\textbf{关键词：} 模型降阶；偏微分方程；增量奇异值分解；正交性；内存占用
+
+\cleardoublestylepage{previous}
+\begin{center}
+    \bfseries \zihao{3} Abstract
+\end{center}
+
+To mitigate the high computational cost of solving parametrized PDEs in many-query scenarios, this thesis applies incremental singular value decomposition (ISVD) to model order reduction. After reviewing the core SVD theory under weighted inner products, we reproduce the improved ISVD by Zhang (2022), which overcomes the orthogonality degradation in the classical Brand algorithm caused by rounding error accumulation. By avoiding the chain multiplication of small orthogonal matrices, the improved algorithm removes the need for frequent reorthogonalization. Numerical experiments on 1D and 2D parametrized elliptic PDEs demonstrate that the improved ISVD maintains weighted orthogonality over long update sequences, achieves approximation accuracy comparable to batch POD, reduces peak memory by over an order of magnitude, and significantly cuts offline computation time. This work provides a numerically stable and computationally efficient solution for reduced-order modeling of large-scale parametrized PDEs.
+\vspace{1em}
+\par\textbf{Keywords:} Model Order Reduction; Partial Differential Equations; Incremental SVD; Orthogonality; Memory Usage

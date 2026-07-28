@@ -1,0 +1,407 @@
+\documentclass[a4paper]{article}
+\usepackage[affil-it]{authblk}
+\usepackage[english]{babel}
+\usepackage[backend=bibtex,style=numeric]{biblatex}
+
+\usepackage{geometry}
+\geometry{margin=1.5cm, vmargin={0pt,1cm}}
+\setlength{\topmargin}{-1cm}
+\setlength{\paperheight}{29.7cm}
+\setlength{\textheight}{25.3cm}
+
+% useful packages.
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}     
+\usepackage{enumerate} %enumerate environment
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{fancyhdr}
+\usepackage{layout}
+\usepackage{ctex}      %中文环境
+\usepackage{booktabs}  %三线表
+\usepackage{verbatim}  %comment environment
+\usepackage{float}     %强制表格图片位置
+\usepackage{listings}  %insert code in latex
+\usepackage{fontspec}  %font support
+\usepackage{tikz}
+\usepackage{makecell}
+\usetikzlibrary{intersections}
+\usepackage{arydshln}
+
+\usepackage[colorlinks,linkcolor=blue]{hyperref}
+\usepackage{xcolor}
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{lightgrey}{rgb}{0.95,0.95,0.95}
+\definecolor{winered}{rgb}{0.5,0,0}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\lstset{
+      backgroundcolor=\color{lightgrey},
+      basicstyle             = \ttfamily,
+      breakatwhitespace      = false,
+      breaklines             = true,
+      captionpos             = none,
+      commentstyle           = \color{mygreen}\bfseries,
+      extendedchars          = false,
+      keepspaces             = true,
+      keywordstyle           = \color{winered},         % keyword style
+      language               = C++,                     % the language of code
+      otherkeywords          = {string},
+      numberstyle            = \tiny\color{mygray},
+      rulecolor              = \color{black},
+      showspaces             = false,
+      showstringspaces       = false,
+      showtabs               = false,
+      stepnumber             = 1,
+      stringstyle            = \color{mymauve},         % string literal style
+      tabsize                = 2,
+      title                  = \lstname,
+      aboveskip              = 0pt,
+      belowskip              = 0pt,
+      columns                = flexible
+}
+
+% some common command
+\newcommand{\dif}{\mathrm{d}}
+\newcommand{\avg}[1]{\left\langle #1 \right\rangle}
+\newcommand{\norm}[1]{\left\| #1 \right\|}
+\newcommand{\difFrac}[2]{\frac{\dif #1}{\dif #2}}
+\newcommand{\pdfFrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\OFL}{\mathrm{OFL}}
+\newcommand{\UFL}{\mathrm{UFL}}
+\newcommand{\fl}{\mathrm{fl}}
+\newcommand{\op}{\odot}
+\newcommand{\Eabs}{E_{\mathrm{abs}}}
+\newcommand{\Erel}{E_{\mathrm{rel}}}
+\addbibresource{citation.bib}
+
+\begin{document}
+% =================================================
+\title{Numerical Analysis chapter 5 theoretical homework}
+
+\author{Zhouyue Qian 3220104074
+  \thanks{Electronic address: \texttt{3220104074@edu.zju.cn}}}
+\affil{(Information and Computational Science Class 2201), Zhejiang University }
+
+
+\date{Due time: \today}
+
+\maketitle
+
+%\begin{abstract}
+%    The abstract is not necessary for the theoretical homework, 
+%    but for the programming project, 
+%    you are encouraged to write one.      
+%\end{abstract}
+
+
+
+
+
+% ============================================
+\section*{I. Give a detailed proof of Theorem 5.7.}
+As we know,$$ <u,v> = \int_{a}^{b} \rho(t)u(t)\overline{v(t)}  \,dt ,$$ where $\rho(x)\in L[a,b]$ is a weight function and $\rho(x)>0,\forall x$ devotes $$\parallel u \parallel_2 = (\int_{a}^{b} \rho(t)|u(t)|^2 \,dt )^{\frac{1}{2}}$$
+\subsection*{Prove $\mathcal{C} [a,b]$ is an inner-product space over $\mathbb{C}$.}
+\begin{enumerate}
+  \item $<u,u> = \int_{a}^{b} \rho(t)u(t)\overline{u(t)}  \,dt = \int_{a}^{b} \rho(t)|u(t)|^2 \,dt > 0$
+  \item $<u,u> = 0$ $\Leftrightarrow$ $\int_{a}^{b} \rho(t)|u(t)|^2 \,dt = 0$ $\Leftrightarrow$ $u(t) = 0$ a.e.
+  \item $<u+v,w> =$ $\int_{a}^{b} \rho(t)(u(t)+v(t))\overline{w(t)}  \,dt = \int_{a}^{b} \rho(t)u(t)\overline{w(t)}  \,dt + \int_{a}^{b} \rho(t)v(t)\overline{w(t)}  \,dt = <u,w> + <v,w>$
+  \item $<cu,v> =$ $\int_{a}^{b} \rho(t)cu(t)\overline{v(t)}  \,dt = c\int_{a}^{b} \rho(t)u(t)\overline{v(t)}  \,dt = c<u,v>$
+  \item $\overline{<u,v>}$ = $\overline{\int_{a}^{b} \rho(t)u(t)\overline{v(t)}  \,dt}$ = $\int_{a}^{b} \rho(t)\overline{u(t)}v(t)  \,dt$ = $<v,u>$
+\end{enumerate}
+The proof is completed.
+\subsection*{Prove $\mathcal{C} [a,b]$ is a normed space over $\mathbb{C}$.}
+We know that $\parallel u \parallel_2 = (\int_{a}^{b} \rho(t)|u(t)|^2 \,dt )^{\frac{1}{2}}$.
+\begin{enumerate}
+  \item It is obvious that funcitons in $\mathcal{C}[a,b]$ are commutative and associative.
+  \item $g = \alpha f$ $\Leftrightarrow$ $g = \alpha f(x), \forall x$
+  \item Assume that $f_0 = 0$, a.e. $f_0(x) = 0 , \forall x$, $f + f_0 = f$ 
+  \item $g(x) = - f(x)$, $g+f = f_0$. We know that $f$ is continuous. $|g(x_1)-g(x_2)| = |f(x_1)-f(x_2)|, \forall x_1,x_2 \in [a,b]$.$\because$ f is continuous and converges, $\therefore$ g is continuous.
+  \item We have $1 \in  \mathbb{R} $, $\forall f \in  \mathcal{C} [a,b], \forall x \in [a,b]$, $1*f(x) = f(x)$
+  \item By the laws of mutiplication and addition, $\mathcal{C}[a,b]$ satisfies distrivutive laws.
+\end{enumerate}
+The proof is completed.
+
+\section*{II. Consider the Chbyshev polynomials of the first kind.}
+$$T_n(x) = cos(n *arccos(x))$$
+\subsection*{a}
+$$T_n(cos \theta) = cos(n \theta)$$
+\begin{align*}
+  \langle T_n, T_m \rangle & = 
+  \int_{-1}^1 \frac{T_n(x)T_m(x)}{\sqrt{1-x^2}}\, dx \\
+  & = \int_{-1}^1 \frac{\cos(n\arccos(x)) \cos(m\arccos(x))}{\sqrt{1-x^2}}\, dx \\
+  & = \int_{\pi}^0 \frac{\cos(n \theta) \cos(m \theta)}{\sqrt{1-\cos^2(\theta)}} \, d(\cos \theta) \\
+  & = \int_0^{\pi} \cos(n\theta) \cos(m\theta) \, d\theta \\
+  & = \int_0^{\pi} \frac{1}{2}(\cos[(n+m)\theta] + \cos[(n-m)\theta]) \, d\theta \\
+  & = \frac{1}{2}(\frac{\sin[(n+m)\theta]}{n+m} + \frac{\sin[(n-m)\theta]}{n-m}) |_0^{\pi} \\
+  & = 0.
+\end{align*}
+i.e. Chbyshev polynomials of the first kind are orthonormal on $[-1,1]$ with $\rho(x)=\frac{1}{\sqrt{1-x^2}}.$
+
+\subsection*{b}
+\noindent $\bullet$ $T_0(x) = \cos(0) = 1,\int_{-1}^1 \frac{1}{\sqrt{1-x^2}}\, dx=\arcsin(x)|_{-1}^1=\pi.$ \\
+\noindent $\bullet$ $T_1(x) = \cos(\arccos(x)) = x,\int_{-1}^1 \frac{x^2}{\sqrt{1-x^2}}\, dx=\int_{\pi}^0 \frac{cos\theta^2}{sin\theta}\, d(cos\theta) = \frac{\pi}{2}$\\
+\noindent $\bullet$ $T_2(x) = \cos(2\arccos(x)) = 2x^2-1,\int_{-1}^1 \frac{(2x^2-1)^2}{\sqrt{1-x^2}}\, dx=\int_{\pi}^0 \frac{(2cos\theta^2-1)^2}{sin\theta}\, d(cos\theta)= \int_{0}^\pi cos(2\theta)^2\, d \theta = \frac{\pi}{2}$
+
+So, we have $u_1^{*} = \frac{1}{\sqrt{\pi}}$,$\sqrt{\frac{2}{\pi}}x$, $u_3^* = \sqrt{\frac{2}{\pi}}(2x^2-1)$.
+
+\section*{III}
+\subsection*{a}
+\noindent (a) By conclusion at II, use the Chbyshev polynomials with weight 
+funciton $\rho(x) = \frac{1}{\sqrt{1-x^2}}.$
+$$
+u_1^*(x) = \frac{1}{\sqrt{\pi}}, \quad
+u_2^*(x) = \sqrt{\frac{2}{\pi}}x, \quad
+u_3^*(x) = \sqrt{\frac{2}{\pi}}(2x^2-1).
+$$
+Calculate the Fourier coefficients of $y(x)=\sqrt{1-x^2},$ we have
+\begin{align*}
+    b_1 & = <y , u_0^*> = \int_{-1}^1 \frac{\sqrt{1-x^2}}{\sqrt{\pi(1-x^2)}} \, dx
+    = \int_{-1}^1 \frac{1}{\sqrt{\pi}} \, dx = \frac{2}{\sqrt{\pi}}, \\
+    b_2 & = <y , u_1^*> = \int_{-1}^1 \frac{\sqrt{1-x^2}}{\sqrt{1-x^2}} \sqrt{\frac{2}{\pi}}x \,dx
+    = \int_{-1}^1 \sqrt{\frac{2}{\pi}}x \, dx = 0, \\
+    b_3 & = <y , u_2^*> = \int_{-1}^1 \frac{\sqrt{1-x^2}}{\sqrt{1-x^2}} \sqrt{\frac{2}{\pi}}(2x^2-1) \, dx
+    = \int_{-1}^1 \sqrt{\frac{2}{\pi}}(2x^2-1) \, dx = -\frac{2}{3}\sqrt{\frac{2}{\pi}}.
+\end{align*}
+Then the minimizing polynomial of $y(x)$ is 
+$$
+\hat{\varphi}(x)=\frac{2}{\sqrt{\pi}}\cdot \frac{1}{\sqrt{\pi}} - \frac{2}{3}\sqrt{\frac{2}{\pi}}\cdot 
+\sqrt{\frac{2}{\pi}}(2x^2-1) = -\frac{8}{3\pi}x^2 + \frac{10}{3\pi}.
+$$
+
+\subsection*{b}
+Denote the best approximation $\hat{\varphi}(x)=a_0+_1x+a_2x^2.$ Get the Gram matrix of $\{1, x, x^2\}$,
+\begin{equation*}
+  G(1, x, x^2) = 
+  \left[
+  \begin{matrix}
+      \langle 1,1 \rangle & \langle 1,x \rangle & \langle 1,x^2 \rangle \\
+      \langle x,1 \rangle & \langle x,x \rangle & \langle x,x^2 \rangle \\
+      \langle x^2,1 \rangle & \langle x^2,x \rangle & \langle x^2,x^2 \rangle
+  \end{matrix}
+  \right]
+  = 
+  \left[
+  \begin{matrix}
+      \pi & 0 & \frac{\pi}{2} \\
+      0 & \frac{\pi}{2} & 0 \\
+      \frac{\pi}{2} & 0 & \frac{3\pi}{8}
+  \end{matrix}
+  \right]
+\end{equation*}
+Then calculate teh vector
+\begin{equation*}
+  \mathsf{c} =
+  \left[
+  \begin{matrix}
+      \langle \sqrt{1-x^2},1 \rangle \\
+      \langle \sqrt{1-x^2},x \rangle \\
+      \langle \sqrt{1-x^2},x^2 \rangle
+  \end{matrix}
+  \right]
+  =
+  \left[
+  \begin{matrix}
+      2 \\ 0 \\ \frac{2}{3}
+  \end{matrix}
+  \right]
+\end{equation*}
+By Theorem 5.34, $G(1, x, x^2)^T\mathsf{a}=\mathsf{c},$ which means 
+\begin{equation*}
+  \left[
+  \begin{matrix}
+      \pi & 0 & \frac{\pi}{2} \\
+      0 & \frac{\pi}{2} & 0 \\
+      \frac{\pi}{2} & 0 & \frac{3\pi}{8}
+  \end{matrix}
+  \right]
+  \left[
+  \begin{matrix}
+      a_0 \\ a_1 \\ a_2
+  \end{matrix}
+  \right]
+  =
+  \left[
+  \begin{matrix}
+      2 \\ 0 \\ \frac{2}{3}
+  \end{matrix}
+  \right]
+\end{equation*}
+Solve the normal equations, we can compute that 
+$a_0=\frac{10}{3\pi},a_1=0,a_2=-\frac{8}{3\pi}.$ 
+
+Hence $\hat{\varphi}(x)= -\frac{8}{3\pi}x^2 + \frac{10}{3\pi}.$
+
+\section*{IV}
+\subsection*{a}
+By definition, we have $\left\lVert u(t),v(t) \right\rVert = \sum\limits_{i=1}^{12}u(t_i)v(t_i).$ and $\left\lVert u(t) \right\rVert = \sqrt{\sum\limits_{i=1}^{12}u^2(t_i)}.$
+Apply the Gram-Schmidt process to $(1,x,x^2)$:
+
+\noindent $\bullet$ $v_1(x)=1,\left\lVert v_1 \right\rVert=\sqrt{12}=2\sqrt{3},
+u_1^*(x)=\frac{v_1(x)}{\left\lVert v_1 \right\rVert}=\frac{1}{2\sqrt{3}}.$
+
+\noindent $\bullet$ $v_2(x)=x-\langle x, u_1^*(x) \rangle u_1^*(x) 
+=x - \sum\limits_{i=1}^{12}\frac{x_i}{2\sqrt{3}} \cdot \frac{1}{2\sqrt{3}}=x-6.5,
+\left\lVert v_2 \right\rVert = \sqrt{\sum\limits_{i=1}^{12}(x_i-6.5)^2} = \sqrt{143}.$ 
+$u_2^*(x) = \frac{v_2(x)}{\left\lVert v_2 \right\rVert} = \frac{1}{\sqrt{143}}(x-6.5).$
+
+\noindent $\bullet$ $v_3(x) = x^2 - \langle x^2, u_1^*(x) \rangle u_1^*(x) - \langle x^2, u_2^*(x) \rangle u_2^*(x)
+=x^2 - \sum\limits_{i=1}^{12} \frac{x_i^2}{12} - \sum\limits_{i=1}^{12} x_i^2(\frac{x_i}{\sqrt{143}} -\frac{1}{2}\sqrt{\frac{13}{11}}) 
+\cdot (\frac{x}{\sqrt{143}} -\frac{1}{2}\sqrt{\frac{13}{11}}) = x^2 - 13x + \frac{91}{3},$
+$\left\lVert v_3 \right\rVert = \sqrt{\sum\limits_{i=1}^{12}(x_i^2 - 13x_i + \frac{91}{3})^2}
+= 2 \sqrt{335}.$
+\noindent Thus $u^*_3(x) = \frac{v_3(x)}{\left\lVert v_3 \right\rVert} 
+= \frac{1}{2\sqrt{335}}(x^2 - 13x + \frac{91}{3}).$
+
+Then the list $( \frac{1}{2\sqrt{3}} , \frac{1}{\sqrt{143}}(x-6.5), 
+\frac{1}{2\sqrt{335}}(x^2 - 13x + \frac{91}{3}) )$ is orthonormal.
+
+\subsection*{b}
+
+$$\hat{\phi(x)} = \sum_{n = 1}^{3} c_n u_i^* = \sum_{n = 1}^{3} <y,u_i^*> u_i^*(x) $$
+
+\noindent $\bullet$ $c_1 = <y,u_1^*> = \sum_{i=1}^{12} y(t_i)u_1^*(t_i) = \sum_{i=1}^{12} \frac{y_i}{2\sqrt{3}} = 277\sqrt{3}.$\\
+\noindent $\bullet$ $c_2 = <y,u_2^*> = \sum_{i=1}^{12} y(t_i)u_2^*(t_i) = \sum_{i=1}^{12} \frac{y_i(x_i-6.5)}{\sqrt{143}} = \frac{589}{\sqrt{143}}.$\\
+\noindent $\bullet$ $c_3 = <y,u_3^*> = \sum_{i=1}^{12} y(t_i)u_3^*(t_i) = \sum_{i=1}^{12} \frac{y_i(x_i^2-13x_i+\frac{91}{3})}{2\sqrt{335}} = \frac{6034}{\sqrt{335}}.$
+
+\begin{align*}
+  \hat{\phi(x)} & = c_1u_1^*(x)+c_2u_2^*(x)+c_3u_3^*(x) \\
+  & = 277\sqrt{3} \cdot \frac{1}{2\sqrt{3}} + \frac{589}{\sqrt{143}} \cdot \frac{1}{\sqrt{143}}(x-6.5) + \frac{6034}{\sqrt{335}} \cdot \frac{1}{2\sqrt{335}}(x^2-13x+\frac{91}{3}) \\
+  & = 384.908 -112.959x+ 9.00597x^2.
+\end{align*}
+
+\subsection*{c}
+The orthonormal list of $u^*_1(x), u^*_2(x), u^*_3(x)$ can be reused since they only 
+depends on the $N$ and $x_i$. But the Fourier coefficients cannot be reuesd since they 
+also depends on $y_i$. If we use the orthonormal polynomials, we can restore them as 
+known conditions, then simplify the process of calculation and only need to calculate 
+the Fourier coefficients. Besides, the method avoid calculating $G^{-1}$, which might has 
+terrible conditional number and get a catastrophic error.
+
+\section*{V,Thm5.66:}
+We have $A \in \mathbb{F}^{m * n}$ and $r = rank(A)$.
+\begin{enumerate}
+  \item $\mathbb{F}^n = span\{u_1, \cdots u_n\}$
+  \item $\mathbb{F}^m = span\{v_1, \cdots v_m\}$
+\end{enumerate}
+\begin{align*}
+  \left\{
+  \begin{array}{l}
+  A^{+}v_j = \frac{1}{\sigma_j}u_j, \forall j = 1, 2 \cdot r,\\
+  A^{+}v_j = 0, \forall j = r+1, \cdots, m
+  \end{array}
+  \right.
+  \quad
+  \left\{
+  \begin{array}{l}
+    A^{+}u_j = \frac{1}{\sigma_j}v_j, \forall i = 1, 2 \cdot r,\\
+    A^{+}u_j = 0, \forall j = r+1, \cdots, n
+  \end{array}
+  \right.
+\end{align*}
+\noindent (a) 
+\begin{align*}
+  AA^{+}Au_j & = AA^{+}\sigma_jv_j = \sigma_jv_j = Au_j.j\leqslant r ,\\
+  AA^{+}Au_j & = 0, j > r
+\end{align*} 
+So, $AA^{+}A = A$.
+
+\noindent (b) 
+\begin{align*}
+  A^{+}AA^{+}v_j & = A^{+}AA^{+}\sigma_ju_j = \sigma_ju_j = Av_j,j\leqslant r, \\
+  A^{+}AA^{+}v_j & = 0, j > r
+\end{align*} 
+So, $A^{+}AA^{+} = A^{+}$.
+
+\noindent (c)
+\begin{align*}
+  \left\{
+  \begin{array}{l}
+  AA^{+}v_j = A\frac{1}{\sigma_j}u_j = v_j, \forall j = 1, 2 \cdot r,\\
+  AA^{+}v_j = 0, \forall j = r+1, \cdots, m
+  \end{array}
+  \right.
+  \quad
+  \left\{
+  \begin{array}{l}
+    (AA^{+})^*v_j = (A^+)^*A^*v_j = (A^+)^*\sigma_j u_j = v_j, \forall i = 1, 2 \cdot r,\\
+    (AA^{+})^*v_j = 0, \forall j = r+1, \cdots, n
+  \end{array}
+  \right.
+\end{align*}
+
+\noindent (d)
+\begin{align*}
+  \left\{
+  \begin{array}{l}
+  A^{+}Au_j = A^{+}\sigma_jv_j = u_j, \forall j = 1, 2 \cdot r,\\
+  A^{+}Au_j = 0, \forall j = r+1, \cdots, m
+  \end{array}
+  \right.
+  \quad
+  \left\{
+  \begin{array}{l}
+    (A^{+}A)^*u_j = A^*(A^+)^*u_j = (A^+)^*\frac{1}{\sigma_j} v_j = u_j, \forall i = 1, 2 \cdot r,\\
+    (A^{+}A)^*u_j = 0, \forall j = r+1, \cdots, n
+  \end{array}
+  \right.
+\end{align*}
+So, $(A^{+}A)^* = A^{+}A$ and $(AA^{+})^* = AA^{+}$.
+
+\subsection*{e}
+Because A has linearly independent columns, we perform Singular Value Decomposition (SVD) on A first.
+By Singular Value Decomposition, we have $A = U\Sigma V^*$, where $U \in \mathbb{F}^{m * m}$, $V \in \mathbb{F}^{n * n}$ are unitary matrices, and $\Sigma \in \mathbb{F}^{m * n}$ is a diagonal matrix with singular values $\sigma_1, \cdots, \sigma_r$ on the diagonal,$m\geqslant n$. 
+\begin{align*}
+  A &= U\Sigma V^* \\
+  A^*&=V\Sigma^*U^* \\
+  A^*A&=V\Sigma^*U^*U\Sigma V^*=V\Sigma^*\Sigma V^*\\
+  \Sigma^*\Sigma &= \begin{bmatrix}
+                    \sigma_1^2 & & & \\
+                    & \sigma_2^2 & & \\
+                    & & \ddots & \\
+                    & & & \sigma_r^2\\
+                    0 & &\cdots & 0
+                  \end{bmatrix}
+\end{align*}
+So, $A^*A$ is invertible.
+\begin{align*}
+  (A^*A)^{-1}A^* &= V(\Sigma^*\Sigma)v^*V\Sigma^*U^* \\
+  &= V\Sigma^+U^* \\
+  &= A^+
+\end{align*}
+From the perspective of mapping, we can derive the following equation:
+\begin{align*}
+  A^*AA^+v_j &= A^*A\frac{1}{\sigma_j}u_j = A^*v_j = A v_j\\
+  A^*AA^+v_j &= 0 , j>r.
+\end{align*}
+So, $A^*AA^+ = A^*$.
+
+\subsection*{f}
+Because A has linearly independent rows, we perform Singular Value Decomposition (SVD) on A first.
+By Singular Value Decomposition, we have $A = U\Sigma V^*$, where $U \in \mathbb{F}^{m * m}$, $V \in \mathbb{F}^{n * n}$ are unitary matrices, and $\Sigma \in \mathbb{F}^{m * n}$ is a diagonal matrix with singular values $\sigma_1, \cdots, \sigma_r$ on the diagonal,$m\geqslant n$. 
+\begin{align*}
+  A &= U\Sigma V^* \\
+  A^*&=V\Sigma^*U^* \\
+  AA^*&=V\Sigma^*U^*U\Sigma V^*=V\Sigma^*\Sigma V^*\\
+  \Sigma^*\Sigma &= \begin{bmatrix}
+                    \sigma_1^2 & & & & 0&\cdots&0\\
+                    & \sigma_2^2 & & & 0&\cdots&0\\
+                    & & \ddots & & 0&\cdots&0\\
+                    & & & \sigma_r^2& 0&\cdots&0\\
+                  \end{bmatrix}
+\end{align*}
+So, $AA^*$ is invertible.
+From the perspective of mapping, we can derive the following equation:
+\begin{align*}
+  AA^*v_j &= A^+A\sigma_ju_j = A^+\sigma_j^2v_j = A^* v_j\\
+  A^+AA^*v_j &= 0 , j>r.
+\end{align*}
+So, $A^+AA^* = A^*$.
+
+% ===============================================
+\section*{ \center{\normalsize {Acknowledgement}} }
+\printbibliography
+
+
+\end{document}

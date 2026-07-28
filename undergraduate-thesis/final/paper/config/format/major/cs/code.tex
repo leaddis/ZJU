@@ -1,0 +1,34 @@
+% 打开 config/format/major/cs/code.tex，用以下内容覆盖或追加：
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{lightgrey}{rgb}{0.95,0.95,0.95}
+\definecolor{winered}{rgb}{0.5,0,0}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{
+      backgroundcolor=\color{lightgrey},
+      basicstyle             = \ttfamily,
+      breakatwhitespace      = false,
+      breaklines             = true,
+      captionpos             = none,
+      commentstyle           = \color{mygreen}\bfseries,
+      extendedchars          = false,
+      keepspaces             = true,
+      keywordstyle           = \color{winered},
+      language               = C++,
+      otherkeywords          = {string},
+      numberstyle            = \tiny\color{gray}, % 注意：我把 \color{mygray} 改成了 gray，因为你的原代码里没有定义 mygray
+      rulecolor              = \color{black},
+      showspaces             = false,
+      showstringspaces       = false,
+      showtabs               = false,
+      stepnumber             = 1,
+      stringstyle            = \color{mymauve},
+      tabsize                = 2,
+      aboveskip              = 0pt,
+      belowskip              = 0pt,
+      columns                = flexible
+}

@@ -1,0 +1,77 @@
+\subsubsection{\texttt{augknt}}
+
+\texttt{augknt}扩充输入的节点序列
+
+输入的节点无要求，函数会先将节点序列排序去重，下面的描述中的首尾节点以及内节点都指排序去重后的节点序列，共两种用法\texttt{augknt(knots,k)}或\texttt{augknt(knots,k,mults)}
+\begin{itemize}
+    \item \texttt{knots} 为输入的节点序列
+    \item \texttt{k} 边界节点的重数
+    \item \texttt{multi} 内节点的重数，为正整数或者正整数数组
+\end{itemize}
+
+\textbf{I.} 
+\texttt{augknt(knots,k)} 根据给出的\texttt{knots}返回一个单增的扩充节点序列满足只在首尾两个节点有重复，重复k次（所以节点序列可能会变短）；以及一个整数表示左端节点增加的重数(因此可以为负数)，可以缺省
+
+\textbf{样例:}
+
+输入：
+\begin{lstlisting}[language = matlab]
+    [knots, addl] = aptknt( [1 2 3 3 3], 2 )
+\end{lstlisting}
+
+ 输出为：
+\begin{lstlisting}[language = matlab ]
+    knots = 
+
+        1   1   2   3   3
+
+
+    addl = 
+
+        1x1 int32
+
+        1
+    % 结果与[knots, addl] = aptknt( [3 2 3 1 3], 2 )相同
+\end{lstlisting}
+
+\textbf{II.}
+\texttt{augknt(knots,k, mults)} 边界点同\texttt{augknt(knots,k)}，内节点会重复\texttt{multi}次，并且若输入的\texttt{multi}为数组并且长度与内节点数量相同那么第\texttt{j}个内节点将会重复\text{multi(j)}次，否则都重复\texttt{multi(1)}次（描述中的下标从1开始记）。同样有addl的返回值，同\texttt{augknt(knots,k)}，样例中不再演示
+
+\textbf{样例1:}
+
+\begin{lstlisting}[language = matlab]
+    knots = augknt( [4 3 2 3 1 3 5], 4, 2 )
+\end{lstlisting}
+
+ 输出为：
+\begin{lstlisting}[language = matlab ]
+    augknot = 
+
+       1   1   1   1   2   2   3   3   4   4   5   5   5   5
+\end{lstlisting}
+
+\textbf{样例2:}
+
+\begin{lstlisting}[language = matlab]
+    knots = augknt( [4 3 2 3 1 3 5], 4, [2 3] )
+\end{lstlisting}
+
+ 输出为：
+\begin{lstlisting}[language = matlab ]
+    augknot = 
+
+       1   1   1   1   2   2   3   3   4   4   5   5   5   5
+\end{lstlisting}
+
+\textbf{样例3:}
+
+\begin{lstlisting}[language = matlab]
+    knots = augknt( [4 3 2 3 1 3 5], 4, [2 3 1] )
+\end{lstlisting}
+
+ 输出为：
+\begin{lstlisting}[language = matlab ]
+    augknot = 
+
+        1   1   1   1   2   2   3   3   3   4   5   5   5   5
+\end{lstlisting}

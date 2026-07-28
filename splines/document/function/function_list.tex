@@ -1,0 +1,27 @@
+\section{目前已经（部分）实现的函数列表}
+
+\subsection{样条函数生成}
+\begin{enumerate}
+      \item \texttt{csapi} 三次 pp 格式样条函数生成，默认使用 not-a-knot 边界条件。
+      \item \texttt{csape} 三次 pp 格式样条函数生成，可由用户指定边界条件。
+      \item \texttt{ppmak} 根据用户给出的信息创建若干 pp 格式的样条曲线。
+      \item \texttt{bspline} 根据输入节点创建一个 B-Spline 基函数，并返回其 pp 格式的表达。
+      \item \texttt{spapi} 根据给定的 B 样条节点或样条曲线次数以及插值条件创建一个 B 格式的样条曲线。
+      \item \texttt{spmak} 根据用户给出的信息创建一个 B 格式的样条曲线。
+\end{enumerate}
+
+\subsection{样条函数后置处理}
+\begin{enumerate}
+      \item \texttt{fnval} 返回样条在一个点或一组点处的函数值。
+      \item \texttt{fn2fm} 将样条函数在不同格式间转换。目前仅支持一维 B 格式样条函数向一维 pp 格式样条函数的转换。
+      \item \texttt{fnder} 返回样条函数的$d$阶导数，负值时返回特定的$|d|$阶不定积分。
+      \item \texttt{fnbrk} 得到样条函数的相关信息
+\end{enumerate}
+
+\subsection{断点、节点、位点}
+\begin{enumerate}
+      \item \texttt{aptknt} 根据给出的数据位点以及样条阶数生成合适的B样条基函数节点序列
+      \item \texttt{augknt} 根据所需要的样条阶数扩充输入的节点序列
+      \item \texttt{sorted} 查找一组点在另一组非递减序列中的相对位置索引。
+      \item \texttt{aveknt} 根据给出的节点序列生成一个新的节点序列。
+\end{enumerate}

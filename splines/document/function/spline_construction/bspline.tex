@@ -1,0 +1,38 @@
+\subsubsection{\texttt{bspline}}
+
+\texttt{bspline} 根据输入节点创建一个 B-Spline 基函数，并返回其 pp 格式的表达。
+
+\textbf{I.}  \texttt{p = bspline(t)}, 该函数返回值为一个结构体，表示根据输入节点序列 \texttt{t} 生成的 B-Spline 基函数的
+pp 格式。节点序列 \texttt{t} 要求满足单增排列，且无重复元素。（{\kaishu 注：1. B-Spline 是样条函数除 pp 格式以外的另一种表达方式，
+其以 B-Spline 基函数为基础，但若要表示某个基函数，仍需使用 pp 格式； 2. 当节点序列 \texttt{t} 中有重复元素时，重复元素对应的节点成为重
+节点，暂不支持此种用法。}）
+
+如输入：
+\begin{lstlisting}[language=matlab]
+        t = [1, 2, 3, 4, 5];
+        p = bspline(t)
+\end{lstlisting}
+
+输出为：
+\begin{lstlisting}
+          form : 'pp'
+        breaks : [1 2 3 4 5]
+         coefs : [4×4 double]
+        pieces : 4
+         order : 4
+           dim : 1
+\end{lstlisting}
+
+\textbf{II.} \texttt{bspline(t)}，绘制根据节点序列 \texttt{t} 生成的 B-Spline 基函数和该基函数的所有分片多项式。注意此种用法
+不能有变量接受函数的返回值。
+
+如输入：
+\begin{lstlisting}[language=matlab]
+        t = [1, 2, 3, 4, 5];
+        bspline(t)
+\end{lstlisting}
+
+输出为一个图像，包含生成的 B-Spline 基函数和该基函数的所有分片多项式。
+
+（{\kaishu \textcolor{blue}{注：这种用法可能需要在函数内部调用 \texttt{plot} 等函数，若在代码实现中绘图函数调用比较困难，需询问
+    北太天元工作人员，实现完成后请删除本注。}}）

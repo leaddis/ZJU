@@ -1,0 +1,193 @@
+%# -*- coding:utf-8 -*-
+\documentclass[10pt,aspectratio=169,mathserif]{beamer}		
+%设置为 Beamer 文档类型，设置字体为 10pt，长宽比为16:9，数学字体为 serif 风格
+
+%%%%-----导入宏包-----%%%%
+\usepackage{zju}			%导入 zju 模板宏包
+\usepackage{ctex}			%导入 ctex 宏包，添加中文支持
+\usepackage{amsmath,amsfonts,amssymb,bm}   %导入数学公式所需宏包
+\usepackage{color}			 %字体颜色支持
+\usepackage{graphicx,hyperref,url}
+\usepackage{metalogo}	% 非必须
+%% 上文引用的包可按实际情况自行增删
+%%%%%%%%%%%%%%%%%%
+\usepackage{fontspec}
+\usepackage{xeCJK}
+% \setCJKmainfont{Source Han Sans SC}
+
+
+
+\beamertemplateballitem		%设置 Beamer 主题
+
+%%%%------------------------%%%%%
+\catcode`\。=\active         %或者=13
+\newcommand{。}{．}				
+%将正文中的“。”号转换为“.”。中文标点国家规范建议科技文献中的句号用圆点替代
+%%%%%%%%%%%%%%%%%%%%%
+
+%%%%----首页信息设置----%%%%
+\title[浙江大学 Beamer 模板]{浙江大学 Beamer 模板}
+\subtitle{——这里是副标题}			
+%%%%----标题设置
+
+
+\author[Guang Touge]{
+  光头哥 \\\medskip
+  {\small \url{chenqiyuan1012@foxmail.com}} \\
+  {\small \url{https://www.zju.edu.cn/}}}
+%%%%----个人信息设置
+  
+\institute[IOPP]{
+  计算机学院 \\ 
+  浙江大学}
+%%%%----机构信息
+
+\date[Aug. 31 2023]{
+  2023年8月31日}
+%%%%----日期信息
+  
+\begin{document}
+
+\begin{frame}
+	\titlepage
+\end{frame}				%生成标题页
+
+\section{提纲}
+\begin{frame}
+	\frametitle{提纲}
+	\tableofcontents
+\end{frame}				%生成提纲页
+
+
+\section{model}
+\begin{frame}
+  \frametitle{模型介绍}
+  \begin{itemize}
+    \item LMNN模型旨在学习一种马氏距离度量，用于提升kNN分类的准确性。
+    \item 模型基于两个关键直觉：一是每个训练输入的k近邻应具有相同标签；二是不同标签的训练输入应广泛分离。
+    \item 通过学习输入空间的线性变换，使训练输入满足上述属性，从而优化距离度量。
+  \end{itemize}
+  %\includegraphics[width=0.8\textwidth]{model_intuition.png} 
+\end{frame}
+
+\begin{frame}
+  \frametitle{关键术语}
+  \begin{itemize}
+    \item 目标邻居：对于每个输入$\vec{x}_{i}$，我们预先确定其目标邻居$\vec{x}_{j}$（记为$j \leadsto i$），期望在学习的距离度量下，这些目标邻居是离$\vec{x}_{i}$最近的。在无先验知识时，通常用欧氏距离确定目标邻居。
+    \item 冒名顶替者：对于输入$\vec{x}_{i}$及其目标邻居$\vec{x}_{j}$，冒名顶替者是指标签与$\vec{x}_{i}$不同且满足$\left\| L\left(\vec{x}_{i}-\vec{x}_{l}\right)\right\| ^{2} \leq\left\| L\left(\vec{x}_{i}-\vec{x}_{j}\right)\right\| ^{2}+1$ \label{eq:impostor} 的输入$\vec{x}_{l}$ 。学习的目标之一是最小化冒名顶替者的数量。
+  \end{itemize}
+  
+  %\includegraphics[width=0.8\textwidth]{terminology_example.png} 
+\end{frame}
+
+\begin{frame}
+  \frametitle{损失函数}
+  \begin{itemize}
+    \item 损失函数由两部分组成：$\varepsilon(L)=(1-\mu) \varepsilon_{pull }(L)+\mu \varepsilon_{push }(L)$ \label{eq:loss_function} ，其中$\mu \in[0,1]$是平衡参数，通常设为0.5。
+    \item $\varepsilon_{pull }(L)=\sum_{j \sim i}\left\| L\left(\vec{x}_{i}-\vec{x}_{j}\right)\right\| ^{2}$ \label{eq:pull_term} ，用于惩罚每个输入与其目标邻居之间的大距离，吸引目标邻居靠近。
+    \item $\varepsilon_{push }(L)=\sum_{i, j \sim i} \sum_{l}\left(1-y_{i l}\right)\left[1+\left\| L\left(\vec{x}_{i}-\vec{x}_{j}\right)\right\| ^{2}-\left\| L\left(\vec{x}_{i}-\vec{x}_{l}\right)\right\| ^{2}\right]_{+}$ \label{eq:push_term} ，使用铰链损失惩罚不同标签样本间的小距离，推远冒名顶替者。
+  \end{itemize}
+  %\includegraphics[width=0.8\textwidth]{loss_function_graph.png} 
+\end{frame}
+
+\begin{frame}
+  \frametitle{局部与全局距离}
+  \begin{itemize}
+    \item LMNN损失函数仅惩罚目标邻居间的大距离，而非同一类中所有样本的大距离。
+    \item 以图2中的玩具数据集为例，该数据集具有多峰结构，类内方差在水平方向较大，但垂直方向的局部信息更能预测类别。
+    \item LMNN和NCA等算法能适应这种局部结构，降低kNN错误率；而LDA、RCA和MCC等算法试图缩小所有同类样本距离，反而增加了错误率。
+  \end{itemize}
+  %\includegraphics[width=0.8\textwidth]{local_vs_global.png} 
+\end{frame}
+
+\begin{frame}
+  \frametitle{凸优化}
+  \begin{itemize}
+    \item 原损失函数对线性变换$L$的矩阵元素非凸，直接用梯度下降易陷入局部极小值。
+    \item 通过变量替换$M = L^{\top}L$，将优化问题转化为对正半定矩阵$M$的优化，得到凸损失函数$\varepsilon(M)$。
+    \item 引入松弛变量$\xi_{i j l}$，将优化问题转化为标准的半定规划（SDP）形式，可使用高效算法求解，确保收敛到全局最优解。
+  \end{itemize}
+  %\includegraphics[width=0.8\textwidth]{convex_optimization.png} 
+\end{frame}
+
+\begin{frame}
+  \frametitle{基于能量的分类}
+  \begin{itemize}
+    \item 除了将学习到的矩阵$M$用作kNN分类的马氏距离度量外，还可将损失函数直接用作基于能量的分类器。
+    \item 对于测试示例$\vec{x}_{t}$，将其视为额外训练示例，为每个可能标签$y_{t}$计算损失函数值。
+    \item 选择使损失函数值最小的标签作为测试示例的分类结果，这种方式通常能进一步提升测试错误率。
+  \end{itemize}
+  % \includegraphics[width=0.8\textwidth]{energy_based_classification.png} 
+\end{frame} 
+
+
+\section{model}
+\begin{frame}
+	\frametitle{介绍}
+
+	\begin{itemize}
+		\item {编译方式}
+		      \begin{itemize}
+			      \item  推荐安装完整版的 TeXLive
+			      \item 使用 \XeLaTeX 编译
+		      \end{itemize}
+		\item 请参考 \LaTeX 和 Beamer 用户文档
+
+		\item 行内数学公式示例 $\sin^2 \theta + \cos^2 \theta = 1$
+		\item {行间数学公式示例 \begin{equation}
+			      y_{1}=\int \sin x\, {\rm d}x
+		      \end{equation}	 }
+		\item 基于“浙大蓝”颜色 \url{https://www.zju.edu.cn/}
+	\end{itemize}
+\end{frame}
+
+\section{内置环境}
+\begin{frame}
+	\frametitle{内置环境}
+	\begin{block}{Slides with \LaTeX}
+		Beamer offers a lot of functions to create nice slides using \LaTeX.
+	\end{block}
+
+	\begin{block}{The basis}
+		内部使用以下主题
+		\begin{itemize}
+			\item split
+			\item whale
+			\item rounded
+			\item orchid
+		\end{itemize}
+	\end{block}
+\end{frame}
+
+\begin{frame}
+	\frametitle{带数字列表}
+	\begin{enumerate}
+		\item This just shows the effect of the style
+		\item It is not a Beamer tutorial
+		\item Read the Beamer manual for more help
+		\item Contact me only concerning the style file
+	\end{enumerate}
+\end{frame}
+
+\section{结论}
+\begin{frame}
+	\frametitle{结论}
+
+	\begin{itemize}
+		\item Easy to use
+		\item Good results
+	\end{itemize}
+\end{frame}
+
+\section{参考文献}
+\begin{frame}{参考文献}
+	\begin{thebibliography}{99}
+		\bibitem{zhao1} Yi~Zhao, {\sl An introduction to X}, Sep.~15, 2015
+		\bibitem{qian2} Er~Qian, San~Sun,
+		Phys.\ Lett.\ A {\bf xx}, 2xx (20xx)
+		\bibitem{li4} Si~Li, Phys.\ Rev.\ C {\bf xx}, 5xx (20xx)
+
+	\end{thebibliography}
+\end{frame}
+
+\end{document}

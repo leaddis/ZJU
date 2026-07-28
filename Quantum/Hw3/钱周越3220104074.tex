@@ -1,0 +1,229 @@
+\documentclass[a4paper]{article}
+\usepackage[affil-it]{authblk}
+\usepackage[english]{babel}
+\usepackage[backend=bibtex,style=numeric]{biblatex}
+
+\usepackage{geometry}
+\geometry{margin=1.5cm, vmargin={0pt,1cm}}
+\setlength{\topmargin}{-1cm}
+\setlength{\paperheight}{29.7cm}
+\setlength{\textheight}{25.3cm}
+
+% useful packages.
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}     
+\usepackage{enumerate} %enumerate environment
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{fancyhdr}
+\usepackage{layout}
+\usepackage{ctex}      %中文环境
+\usepackage{booktabs}  %三线表
+\usepackage{verbatim}  %comment environment
+\usepackage{float}     %强制表格图片位置
+\usepackage{listings}  %insert code in latex
+\usepackage{fontspec}  %font support
+\usepackage{tikz}
+\usepackage{makecell}
+\usetikzlibrary{intersections}
+\usepackage{arydshln}
+
+\usepackage[colorlinks,linkcolor=blue]{hyperref}
+\usepackage{xcolor}
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{lightgrey}{rgb}{0.95,0.95,0.95}
+\definecolor{winered}{rgb}{0.5,0,0}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\lstset{
+      backgroundcolor=\color{lightgrey},
+      basicstyle             = \ttfamily,
+      breakatwhitespace      = false,
+      breaklines             = true,
+      captionpos             = none,
+      commentstyle           = \color{mygreen}\bfseries,
+      extendedchars          = false,
+      keepspaces             = true,
+      keywordstyle           = \color{winered},         % keyword style
+      language               = C++,                     % the language of code
+      otherkeywords          = {string},
+      numberstyle            = \tiny\color{mygray},
+      rulecolor              = \color{black},
+      showspaces             = false,
+      showstringspaces       = false,
+      showtabs               = false,
+      stepnumber             = 1,
+      stringstyle            = \color{mymauve},         % string literal style
+      tabsize                = 2,
+      title                  = \lstname,
+      aboveskip              = 0pt,
+      belowskip              = 0pt,
+      columns                = flexible
+}
+
+% some common command
+\newcommand{\dif}{\mathrm{d}}
+\newcommand{\avg}[1]{\left\langle #1 \right\rangle}
+\newcommand{\norm}[1]{\left\| #1 \right\|}
+\newcommand{\difFrac}[2]{\frac{\dif #1}{\dif #2}}
+\newcommand{\pdfFrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\OFL}{\mathrm{OFL}}
+\newcommand{\UFL}{\mathrm{UFL}}
+\newcommand{\fl}{\mathrm{fl}}
+\newcommand{\op}{\odot}
+\newcommand{\Eabs}{E_{\mathrm{abs}}}
+\newcommand{\Erel}{E_{\mathrm{rel}}}
+\addbibresource{citation.bib}
+
+\begin{document}
+% =================================================
+\title{Quantum information and quantum computation homework 3}
+
+\author{Zhouyue Qian 3220104074
+  \thanks{Electronic address: \texttt{3220104074@edu.zju.cn}}}
+\affil{(Information and Computational Science Class 2201), Zhejiang University }
+
+
+\date{Due time: \today}
+
+\maketitle
+
+\begin{abstract}
+    \noindent\textbf{Problem:}  
+    Prove that any language that can be decided in polynomial time by a Turing machine with an oracle for some language \( L \in \Sigma_k \) (or \( L \in \Pi_k \)) is contained in \(\Sigma_{k+1} \cap \Pi_{k+1}\).
+
+    Formally, let \(A\) be a language and assume there exists a polynomial-time Turing machine \(M^L\) that decides \(A\) using an oracle for a language \(L \in \Sigma_k\) (or \(L \in \Pi_k\)). Show that:
+    \[
+    A \in \Sigma_{k+1} \cap \Pi_{k+1}.
+    \]
+
+\end{abstract}
+
+\section*{Definition Recap (Definition 2.2)}
+
+\subsection*{Turing Machine with an Oracle (\( X \))}
+\begin{itemize}
+    \item A Turing machine (TM) uses an oracle as a supplementary tape.
+    \item The oracle can determine the value \( X(z) \), where \( z \) is the binary representation of an integer \( j \) in the range \([0, n-1]\), or \( X(z) \) is undefined for other \( z \).
+\end{itemize}
+
+\subsection*{Computation of a Function \( f:B^n \to B^m \)}
+\begin{itemize}
+    \item Input \( x \) is provided with \( |x| = n \).
+    \item Another number \( k \leq m \) is specified, and the computation involves querying the oracle.
+    \item The TM's workspace is limited by \( s \), and \( n \leq 2^s \), \( m \leq 2^s \).
+    \item The computation halts within \( \exp(O(s)) \) time or enters a cycle.
+\end{itemize}
+
+\section*{Definition of Oracle Turing Machines and Complexity Classes}
+
+\subsection*{Definition of Oracle Turing Machines}
+An oracle Turing machine is a theoretical model that allows a Turing machine to query an external subroutine (oracle) to obtain computational results. The oracle is defined as a language $O \subseteq \{0, 1\}^*$, and its behavior is as follows:
+
+\begin{itemize}
+    \item An oracle Turing machine $M^O$ is a multitape Turing machine with the following additional components:
+    \begin{itemize}
+        \item An \textbf{oracle tape} for writing the string $x$ to be queried.
+        \item Three special states: $q_{\text{query}}, q_{\text{yes}}, q_{\text{no}}$.
+    \end{itemize}
+    \item Operation:
+    \begin{enumerate}
+        \item The machine writes a query string $x$ onto the oracle tape.
+        \item The machine transitions to the $q_{\text{query}}$ state to initiate the query process.
+        \item The oracle provides the result:
+        \begin{itemize}
+            \item If $x \in O$, the machine transitions to the $q_{\text{yes}}$ state.
+            \item If $x \notin O$, the machine transitions to the $q_{\text{no}}$ state.
+        \end{itemize}
+    \end{enumerate}
+    \item The query process is instantaneous, and the computational complexity accounts only for the time required to write $x$ onto the oracle tape.
+\end{itemize}
+
+\subsection*{Definition of Complexity Classes}
+\begin{itemize}
+    \item \textbf{P$^O$}:
+    \begin{itemize}
+        \item Definition: $P^O$ is the set of all languages computable by a \textbf{deterministic Turing machine} (DTM) using oracle $O$ in polynomial time.
+        \item Mathematical representation:
+        \[
+        P^O = \{L \subseteq \{0, 1\}^* : \exists \text{ DTM } M \text{ such that } M^O \text{ computes } L \text{ in polynomial time}\}
+        \]
+    \end{itemize}
+    
+    \item \textbf{NP$^O$}:
+    \begin{itemize}
+        \item Definition: $NP^O$ is the set of all languages computable by a \textbf{nondeterministic Turing machine} (NDTM) using oracle $O$ in polynomial time.
+        \item Mathematical representation:
+        \[
+        NP^O = \{L \subseteq \{0, 1\}^* : \exists \text{ NDTM } M \text{ such that } M^O \text{ computes } L \text{ in polynomial time}\}
+        \]
+    \end{itemize}
+\end{itemize}
+
+\subsection*{Role of Oracle Turing Machines in Complexity Classes}
+Oracle Turing machines play a significant role in the study of complexity classes:
+\begin{itemize}
+    \item Oracles provide additional computational power, enabling the simulation of higher levels of complexity classes.
+    \item If the oracle belongs to $P$, i.e., $O \in P$, then $P^O = P$, as queries to $O$ can be directly simulated by a deterministic Turing machine in polynomial time.
+    \item If the oracle is a more complex language, such as $SAT$, then $NP^{SAT}$ and $P^{SAT}$ define the computational capabilities involving more complex problems.
+\end{itemize}
+
+\section*{Proof Outline}
+\subsection*{Context and Goal}
+Assume there is a language \( A \) and a polynomial-time Turing machine \( M^L \) that decides \( A \) using an oracle for some language \( L \). In other words, given an input \( w \), \( M^L \) runs in polynomial time and can query the oracle \( L \) multiple times (a polynomial number of queries) to decide whether \( w \in A \).
+
+We are given that \( L \in \Sigma_k \) or \( L \in \Pi_k \). Our goal is to show:
+\[
+A \in \Sigma_{k+1} \cap \Pi_{k+1}.
+\]
+
+\subsection*{Key Definitions}
+\begin{itemize}
+  \item \textbf{Oracle Turing Machine:} An oracle Turing machine \( M^L \) can query an oracle for a language \( L \). For any string \( x \), the oracle answers whether \( x \in L \) in a single step.
+
+  \item \textbf{Complexity Classes \(\Sigma_k\) and \(\Pi_k\):}  
+    The classes \(\Sigma_k\) and \(\Pi_k\) can be defined in terms of alternating quantifiers over polynomial-time predicates. For instance,
+    \[
+    L \in \Sigma_k \iff L = \{x \mid \exists y_1 \forall y_2 \exists y_3 \cdots Q y_k : P(x,y_1,\dots,y_k)\}
+    \]
+    where \( P \) is a predicate decidable in polynomial time. Similarly, \(\Pi_k\) classes are defined with an alternating quantifier prefix starting with a universal quantifier. These classes can also be characterized via polynomial-time machines equipped with oracles from lower-level classes.
+\end{itemize}
+
+\subsection*{Proof Idea}
+1. \textbf{Setup:}
+   Suppose \( M^L \) is a polynomial-time machine that decides \( A \) with access to an \( L \)-oracle. Since \( L \in \Sigma_k \) (the case \( L \in \Pi_k \) is analogous), the oracle queries made by \( M^L \) can be replaced by a \(\Sigma_k\)-level decision procedure.
+
+2. \textbf{Expanding Oracle Queries:}
+   Each oracle query \( x \in L \)? can be decided by a \(\Sigma_k\)-machine (or equivalently represented by a \(\Sigma_k\)-type alternating quantifier formula). Thus, replacing the oracle queries within \( M^L \)'s polynomial-time computation amounts to embedding a \(\Sigma_k\)-description of each query's decision procedure.
+
+3. \textbf{Complexity Level Upgrade:}
+   If the base machine \( M \) (without the oracle) is nondeterministic (corresponding to \(\Sigma_0\) structure), then adding a \(\Sigma_k\)-level oracle turns the decision process into a \(\Sigma_{k+1}\)-level characterization. Similarly, if \( M \) is deterministic (\(\Pi_0\)-level), the addition of a \(\Sigma_k\)-type oracle also raises the complexity class to \(\Pi_{k+1}\).
+
+   By considering both the \(\Sigma_k\) and \(\Pi_k\) oracle scenarios and using the duality of these classes, we conclude that:
+   \[
+   A \in \Sigma_{k+1} \cap \Pi_{k+1}.
+   \]
+
+\subsection*{Conclusion}
+By simulating the oracle queries and integrating the complexity of \( L \) (at the \(\Sigma_k\) or \(\Pi_k\)-level) into the polynomial-time computation of \( M \), we effectively increase the complexity level by one. As a result, any language decided in polynomial time by a Turing machine with an oracle for \( L \in \Sigma_k \) (or \( L \in \Pi_k \)) belongs to \(\Sigma_{k+1} \cap \Pi_{k+1}\).
+
+\[
+\boxed{A \in \Sigma_{k+1} \cap \Pi_{k+1}.}
+\]
+
+
+
+\end{document}
+
+
+
+
+% ============================================
+
+% ===============================================
+%\section*{ \center{\normalsize {Acknowledgement}} }
+%\printbibliography
+
+
+\end{document}

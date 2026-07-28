@@ -1,0 +1,372 @@
+#include "Spline.h"
+#include <stdexcept>
+#include <algorithm>
+#include <iostream>
+
+//===================================================================================
+//           Implementation of 1st-Order Piecewise Polynomial Spline
+//===================================================================================
+
+// 构造函数
+Spline<1, SplineType::ppForm>::Spline(const InterpCondition& c)
+    : knots(c.sites), values(c.function_values)
+{
+    if (c.sites.size() != c.function_values.size())
+        throw std::invalid_argument("样条插值输入坐标向量大小不一致！");
+    doubleSort(knots, values); // 按照knots单增的顺序排序
+    fit(knots, values);        // 拟合样条
+}
+
+// 对向量x,y按照x的单增顺序同时进行排列
+void Spline<1, SplineType::ppForm>::doubleSort(std::vector<double> &x, std::vector<double> &y)
+{
+    if (x.size() == y.size())
+    {
+        int size = x.size();
+        for (int i = 0; i < size - 1; i++)
+        {
+            for (int j = i + 1; j < size; j++) // 修正内层循环j的起始值为i+1
+            {
+                if (x[i] > x[j])
+                {
+                    std::swap(x[i], x[j]);
+                    std::swap(y[i], y[j]);
+                }
+            }
+        }
+    }
+}
+
+// 拟合方法
+void Spline<1, SplineType::ppForm>::fit(const std::vector<double>& x, const std::vector<double>& y) {
+    if (x.size() != y.size() || x.size() < 2) {
+        throw std::invalid_argument("输入向量x和y必须具有相同的大小且至少包含2个点。");
+    }
+
+    knots = x;
+    values = y;
+
+    int n = knots.size();
+    a.resize(n - 1);
+    b.resize(n - 1);
+    for (int i = 0; i < n - 1; ++i) {
+        a[i] = values[i];
+        b[i] = (values[i + 1] - values[i]) / (knots[i + 1] - knots[i]);
+    }
+}
+
+// 重载()运算符用于评估
+double Spline<1, SplineType::ppForm>::operator()(double x_val) const {
+    int n = knots.size();
+    if (n < 2) {
+        throw std::runtime_error("样条尚未拟合。");
+    }
+
+    // 找到x_val所在的区间
+    int i = 0;
+    while (i < n - 2 && x_val >= knots[i + 1]) {
+        ++i;
+    }
+
+    // 线性插值
+    return a[i] + b[i] * (x_val - knots[i]);
+}
+
+//===================================================================================
+//           Implementation of 3rd-Order Piecewise Polynomial Spline
+//===================================================================================
+
+// 构造函数
+Spline<3, SplineType::ppForm>::Spline(const InterpCondition &c)
+{
+    if (c.sites.size() != c.function_values.size())
+        throw std::invalid_argument("样条插值输入坐标向量大小不一致！");
+    knots = c.sites;
+    values = c.function_values;
+    doubleSort(knots, values); // 按照knots单增的顺序排序
+    N = knots.size();
+
+    if (N < 3) {
+        throw std::invalid_argument("立方样条需要至少3个点。");
+    }
+
+    // 初始化系数矩阵A和右端向量rhs为零
+    Eigen::MatrixXd A = Eigen::MatrixXd::Zero(N, N);
+    Eigen::VectorXd rhs = Eigen::VectorXd::Zero(N);
+
+    // 初始化公共部分的系数矩阵和右端向量
+    initialize_common_part(A, rhs, values);
+
+    // 处理左边界条件
+    switch (c.left)
+    {
+    case BCType::complete:
+        complete(true, A, rhs, values, c.derivative1);
+        break;
+    case BCType::specified_2nd:
+        specified_2nd(true, A, rhs, c.derivative1);
+        break;
+    case BCType::natural:
+        natural(true, A, rhs);
+        break;
+    case BCType::not_a_knot:
+        not_a_knot(true, A, rhs);
+        break;
+    case BCType::periodic:
+        if (c.right != BCType::periodic)
+            throw std::invalid_argument("周期边界条件不能和其他边界条件混合使用！");
+        periodic(A, rhs, values);
+        break;
+    default:
+        throw std::invalid_argument("未定义的边界条件类型！");
+        break;
+    }
+
+    // 处理右边界条件
+    switch (c.right)
+    {
+    case BCType::complete:
+        complete(false, A, rhs, values, c.derivative2);
+        break;
+    case BCType::specified_2nd:
+        specified_2nd(false, A, rhs, c.derivative2);
+        break;
+    case BCType::natural:
+        natural(false, A, rhs);
+        break;
+    case BCType::not_a_knot:
+        not_a_knot(false, A, rhs);
+        break;
+    case BCType::periodic:
+        if (c.left != BCType::periodic)
+            throw std::invalid_argument("周期边界条件不能和其他边界条件混合使用！");
+        periodic(A, rhs, values);
+        break;
+    default:
+        throw std::invalid_argument("未定义的边界条件类型！");
+        break;
+    }
+
+    // 求解线性方程组 A * M = rhs
+    Eigen::VectorXd M = A.colPivHouseholderQr().solve(rhs);
+    if ((A * M - rhs).norm() > 1e-10) {
+        throw std::runtime_error("线性方程组求解不精确，可能存在数值问题。");
+    }
+
+    // 使用M值分配多项式
+    assign_polys_with_M(M, values);
+}
+
+// 计算mu值
+double Spline<3, SplineType::ppForm>::mu(int i) const
+{
+    if (i <= 0 || i >= static_cast<int>(knots.size()))
+        throw std::invalid_argument("样条内部实现错误：输入索引在节点标号之外。");
+    if (i == 1)
+    {
+        int N_total = knots.size();
+        return (knot(N_total) - knot(N_total - 1)) / (knot(2) - knot(1) + knot(N_total) - knot(N_total - 1));
+    }
+    else
+    {
+        return (knot(i) - knot(i - 1)) / (knot(i + 1) - knot(i - 1));
+    }
+}
+
+// 计算lambda值
+double Spline<3, SplineType::ppForm>::lambda(int i) const
+{
+    return 1.0 - mu(i);
+}
+
+//计算K
+double Spline<3,SplineType::ppForm> ::K(int i) const
+{
+    return ((values[i+1] - values[i]) / (knots[i+1]-knots[i]));
+}
+
+// 初始化公共部分的系数矩阵和右端向量
+void Spline<3, SplineType::ppForm>::initialize_common_part(Eigen::MatrixXd& A, Eigen::VectorXd& rhs, const std::vector<double> &values) const
+{
+    for (int i = 1; i < N - 1; i++)
+    {
+        A(i, i) = 2.0;
+        A(i, i - 1) = mu(i + 1);
+        A(i, i + 1) = lambda(i + 1);
+        rhs(i) = 6.0 * (K(i) - K(i -1)) / ((knots[i+1]-knots[i-1]));
+    }
+}
+
+// 使用M值分配多项式
+void Spline<3, SplineType::ppForm>::assign_polys_with_M(const Eigen::VectorXd& M, const std::vector<double>& values)
+{
+    int N = knots.size();
+    pp.clear();
+    for (int i = 0; i < N - 1; i++)
+    {
+        Polynomial res{values[i]}; // 常数项 f_i
+        Polynomial p{-knots[i], 1.0}; // (x - x_i)
+        double K = (values[i + 1] - values[i]) / (knots[i + 1] - knots[i]); // 一阶导数
+
+        double c_1 = K - (2.0 * M[i] + M[i + 1]) * (knots[i + 1] - knots[i]) / 6.0;
+        res = res + (p * c_1); // f_i + c_1 (x - x_i)
+        res = res + ((p * p) * (M[i] / 2.0)); // + (M_i / 2)*(x - x_i)^2
+        double c_3 = (M[i + 1] - M[i]) / (6.0 * (knots[i + 1] - knots[i]));
+        res = res + (p * p * p * c_3); // + (c_3)*(x - x_i)^3
+
+        pp.push_back(res);
+    }
+}
+
+// 处理完备边界条件
+void Spline<3, SplineType::ppForm>::complete(bool left, Eigen::MatrixXd& A, Eigen::VectorXd& rhs,
+                                             const std::vector<double> &values, double d)
+{
+    if (left)
+    {
+        // 左端完备边界条件
+        A(0, 0) = -(knot(2) - knot(1)) / 3.0;
+        A(0, 1) = -(knot(2) - knot(1)) / 6.0;
+        rhs(0) = d - (values[1] - values[0]) / (knot(2) - knot(1));
+    }
+    else
+    {
+        // 右端完备边界条件
+        A(N - 1, N - 2) = (knot(N) - knot(N - 1)) / 6.0;
+        A(N - 1, N - 1) = (knot(N) - knot(N - 1)) / 3.0;
+        rhs(N - 1) = d - (values[N - 1] - values[N - 2]) / (knot(N) - knot(N - 1));
+    }
+}
+
+// 处理指定二阶导数边界条件
+void Spline<3, SplineType::ppForm>::specified_2nd(bool left, Eigen::MatrixXd& A, Eigen::VectorXd& rhs, double d)
+{
+    if (left)
+    {
+        // 左端指定二阶导数
+        A(0, 0) = 1.0;
+        rhs(0) = d;
+    }
+    else
+    {
+        // 右端指定二阶导数
+        A(N - 1, N - 1) = 1.0;
+        rhs(N - 1) = d;
+    }
+}
+
+// 处理自然边界条件
+void Spline<3, SplineType::ppForm>::natural(bool left, Eigen::MatrixXd& A, Eigen::VectorXd& rhs)
+{
+    if(left)
+    {
+        A(0, 0) = 2;
+        rhs(0) = 0;
+    }
+    else{
+        A(N-1, N-1) = 2;
+        rhs(N-1) = 0;
+    }
+}
+
+// 处理非结点边界条件
+void Spline<3, SplineType::ppForm>::not_a_knot(bool left, Eigen::MatrixXd& A, Eigen::VectorXd& rhs)
+{
+    if (left)
+    {
+        // 左端非结点条件
+        A(0, 0) = -lambda(2);
+        A(0, 1) = 1.0;
+        A(0, 2) = -mu(2);
+        rhs(0) = 0.0;
+    }
+    else
+    {
+        // 右端非结点条件
+        A(N - 1, N - 3) = -lambda(N - 1);
+        A(N - 1, N - 2) = 1.0;
+        A(N - 1, N - 1) = -mu(N - 1);
+        rhs(N - 1) = 0.0;
+    }
+}
+
+// 处理周期边界条件
+void Spline<3, SplineType::ppForm>::periodic(Eigen::MatrixXd& A, Eigen::VectorXd& rhs,
+                              const std::vector<double>& values)
+{
+    // 周期样条左右边界必须一致
+    A(0, 0) = 2.0;
+    A(0, 1) = lambda(1);
+    A(0, N - 2) = mu(1);
+    A(N - 1, 0) = 1.0;
+    A(N - 1, N - 1) = -1.0;
+    rhs(0) = (values[1] - values[0]) / (knots[1] - knots[0]);
+    rhs(0) -= (values[N - 1] - values[N - 2]) / (knots[N - 1] - knots[N - 2]);
+    rhs(0) *= 6.0;
+    rhs(0) /= (knots[1] - knots[0] + knots[N - 1] - knots[N - 2]);
+    rhs(N - 1) = 0.0;
+}
+
+// 重载()运算符用于评估
+double Spline<3, SplineType::ppForm>::operator()(double x_val) const
+{
+    // 找到x_val所在的区间
+    int i = 0;
+    while (i < N - 1 && x_val > knots[i + 1]) {
+        ++i;
+    }
+
+    // 计算多项式在该区间的值
+    double dx = x_val - knots[i];
+    return pp[i](dx);
+}
+
+// 打印每个区间的绝对形式的样条函数
+void Spline<3, SplineType::ppForm>::printSplineFunctions_absolute() const
+{
+    std::cout << "每个区间的绝对形式样条函数:\n";
+    for (int i = 0; i < N - 1; i++)
+    {
+        std::cout << "区间 [" << knots[i] << ", " << knots[i + 1] << "]:\n";
+        std::cout << "f(x) = " << pp[i] << "\n\n";
+    }
+}
+
+// 打印每个区间的相对形式的样条系数
+void Spline<3, SplineType::ppForm>::printSplinecoefficients_relative() const
+{
+    std::cout << "每个区间的相对形式样条系数:\n";
+    for (int i = 0; i < N - 1; i++)
+    {
+        std::cout << "区间 [" << knots[i] << ", " << knots[i + 1] << "]:\n";
+        std::vector<double> coeff = pp[i].get_coeff();
+        if (coeff.size() < 4) {
+            // 如果多项式次数不够，补零
+            coeff.resize(4, 0.0);
+        }
+        std::cout << "f(x) = " 
+                  << coeff[3] << " * (x - " << knots[i] << ")^3 + " 
+                  << coeff[2] << " * (x - " << knots[i] << ")^2 + " 
+                  << coeff[1] << " * (x - " << knots[i] << ") + " 
+                  << coeff[0] << "\n\n";
+    }
+}
+
+void Spline<3, SplineType::ppForm>::doubleSort(std::vector<double>& x, std::vector<double>& y)
+{
+    if (x.size() == y.size())
+    {
+        int size = x.size();
+        for (int i = 0; i < size - 1; i++)
+        {
+            for (int j = i + 1; j < size; j++) // 修正内层循环j的起始值为i+1
+            {
+                if (x[i] > x[j])
+                {
+                    std::swap(x[i], x[j]);
+                    std::swap(y[i], y[j]);
+                }
+            }
+        }
+    }
+}

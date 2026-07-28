@@ -1,0 +1,17 @@
+\subsubsection{\texttt{sorted}}
+\texttt{sorted} 函数用于查找一组点在另一组非递减序列中的相对位置索引。
+\begin{itemize}
+\item \texttt{pointer = sorted(meshsites, sites)} 返回一个整数行向量 \texttt{pointer}，其中每个条目 \texttt{j} 等于\texttt{sites}的单增序列的第\texttt{j}项在 \texttt{meshsites} 中小于或等于 \texttt{sites(i)} 的条目数量。
+\item 此函数特别适用于在拟合或插值过程中定位数据点相对于基准点集（如结点序列）的位置。
+\end{itemize}
+如输入：
+\begin{lstlisting}[language = Matlab]
+meshsites = [1 2 3 3 4 5];
+sites = [2 3 1 4 3];
+pointer = sorted(meshsites, sites);
+\end{lstlisting}
+输出为：
+\begin{lstlisting}[language = Matlab]
+pointer: [1 2 4 4 5]
+\end{lstlisting}
+此输出表示 \texttt{sites} 中的每个点相对于 \texttt{meshsites} 的位置。例如，第一个 \texttt{1} 表示 \texttt{sites} 中最小的元素 \texttt{1} 的位置在 \texttt{meshsites} 中的相对位置索引。

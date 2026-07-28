@@ -1,0 +1,77 @@
+\subsubsection{\texttt{ppmak}}
+
+\texttt{ppmak}函数根据用户给出的信息创建若干 pp 格式的分段多项式，目前提供3种用法:
+
+\textbf{I.}  \texttt{pp = ppmak(breaks,coefs)},该函数返回值为一个结构体( pp 格式 )，其中
+
+\begin{itemize}
+    \item \texttt{breaks} 为节点横坐标构成的一维向量，要求其已完成单增排列；
+    \item \texttt{coefs} 为二维矩阵，由分片多项式的系数构成。
+          \begin{itemize}
+              \item 列数 \texttt{l = (length(breaks) - 1)*Order}, \texttt{Order} 为分段多项式的次数，由此可见我们要求输入的节点必须满足 \texttt{length(breaks)-1} 能够整除 \texttt{coefs} 矩阵的列数;
+              \item 行数决定了分段多项式的数量或者说维数，即矩阵的每一行是一个以 \texttt{breaks} 为节点，以 \texttt{coefs} 中对应行为系数的分段多项式。
+              \item 更加确切的说，若令 k 表示分段多项式的次数，则 \texttt{coefs(:,i*k+j)} 即为该行表示的分段多项式的第 \texttt{(i+1)} 个分片多项式的第 \texttt{j} 个系数，这里的系数是按从高次到低次的顺序排列的。
+          \end{itemize}
+    \item \texttt{pp} 为一结构体，包含如下字段：
+          \begin{itemize}
+              \item \texttt{form} (样条的形式，在这里为 pp 格式)
+              \item \texttt{breaks} (样条节点的位置，为一维向量，与输入的 \texttt{breaks} 相同)
+              \item \texttt{coefs} (分段多项式系数组成的矩阵，与输入的 \texttt{coefs}矩阵有所区别，接下来会详细介绍)
+              \item \texttt{pieces} (每一维分段多项式的多项式片数，即 \texttt{length(breaks) - 1})
+              \item \texttt{order} (分段多项式的阶数)
+              \item \texttt{dim} (目标函数的维数，即输入的 \texttt{coefs} 的行数)。
+              \item 在这里需要特别注意的是，输出结果中的 \texttt{coefs} 矩阵会重新排序，与输入的 \texttt{coefs} 矩阵不同。其列数为分段多项式的次数 \texttt{Order}，其行数 \texttt{r = (length(breaks)-1)*d}, \texttt{d} 为分段多项式的维数。具体来说 \texttt{coefs(i*d+j,:)}, 其中 \texttt{j = 1,2,$\dots$,d} 为第 \texttt{j} 维分段多项式的第 \texttt{(i+1)} 片多项式的系数。
+          \end{itemize}
+\end{itemize}
+
+如输入：
+\begin{lstlisting}[language = matlab]
+    p1 = ppmak([1 3 4],[1 2 5 6;3 4 7 8])
+\end{lstlisting}
+
+输出为：
+\begin{lstlisting}[language = matlab ]
+    form  : 'pp'
+    breaks: [1 3 4]
+    coefs : [4 * 2 double]
+    pieces: 2
+    order : 2
+    dim   : 2
+\end{lstlisting}
+
+输出中的 \texttt{coefs} 矩阵为:
+\begin{lstlisting}[language = matlab ]
+    [1 2;3 4;5 6;7 8];
+\end{lstlisting}
+
+从中可以看出返回的结构体中的系数矩阵与输入的 \texttt{coefs} 矩阵的区别。
+
+\textbf{II.}  \texttt{[pp1,pp2,...,ppm] = ppmak(breaks,coefs)},该函数与上面的函数类似，但其返回值为多个结构体(pp 格式)，每个结构体的维数都是1维，也即将第一种用法中的输出结果拆分为多个1维的情形。其输入参数与第一种用法相同，且要求输出参数的个数必须等于
+\texttt{coefs} 矩阵的行数。
+
+\textbf{III.}  \texttt{pp = ppmak(breaks,coefs,d)},该函数与第一种用法类似，返回值为一个结构体(pp 格式)，但其输入参数个数和方式与第一种用法有所不同，其中
+\begin{itemize}
+    \item \texttt{breaks} 为节点横坐标构成的一维向量，要求其已完成单增排列；
+    \item \texttt{coefs} 为二维矩阵，由分片多项式的系数构成，其形式与上面第一种用法中的不同。在此用法中，要求系数矩阵的形式与第一种用法中输出结果中的系数矩阵的形式相同，具体形式可参见函数的第一种用法。于是在该用法中，输入的 \texttt{coefs} 矩阵与输出结果中
+          的 \texttt{coefs} 矩阵完全相同。
+    \item \texttt{d} 为一标量，表示分段多项式的维数;
+    \item \texttt{pp} 为一结构体，具体可见该函数第一种用法中该结构体的介绍，需要注意的是这里结构体中的 \texttt{coefs} 矩阵没有
+          调整顺序，与输入的 \texttt{coefs} 矩阵相同。
+\end{itemize}
+
+如输入：
+\begin{lstlisting}[language = matlab]
+    p2 = ppmak([1 3 4],[1 2;3 4;5 6;7 8],2)
+\end{lstlisting}
+
+输出为：
+\begin{lstlisting}[language = matlab ]
+    form  : 'pp'
+    breaks: [1 3 4]
+    coefs : [4 * 2 double]
+    pieces: 2
+    order : 2
+    dim   : 2
+\end{lstlisting}
+
+其结果与第一种用法中的完全相同，只不过该种用法提供了内部使用中的系数矩阵的排列。

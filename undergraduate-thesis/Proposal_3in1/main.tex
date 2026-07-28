@@ -1,0 +1,37 @@
+\documentclass[a4paper, 12bp, twoside]{isee3in1}
+%-----------------------------------------------------------------
+% global information
+%-----------------------------------------------------------------
+\newcommand{\StudentName}{钱周越}
+\newcommand{\StudentID}{3220104074}
+\newcommand{\Supervisor}{李雨文 教授}
+\newcommand{\Grade}{2022级}
+\newcommand{\Major}{信息与计算科学}
+\newcommand{\College}{数学科学学院}
+\newcommand{\ProjectName}{基于增量奇异值分解的偏微分方程模型降阶方法}
+%-----------------------------------------------------------------
+% main doc
+%-----------------------------------------------------------------
+\begin{document}
+% 目录
+\makecover
+% 正文字体设置
+\globalmainfont
+% 课题信息页
+\newpage
+\thispagestyle{infoPage}
+\include{contents/00_Info}
+% 目录页
+\newpage
+\pagestyle{indexPage}
+\tableofcontents
+\vspace{12pt}\noindent {\CJKfamily{simhei}\fontsize{12bp}{18bp}\bfseries \hspace{0.36em}《浙江大学本科生文献综述和开题报告考核表》}\vspace{6pt}
+% 正文部分
+\newpage
+\pagestyle{mainPage}
+\include{contents/01_Review}
+\include{contents/02_Report}
+\include{contents/03_Translate}
+\include{contents/04_TransOriginal}
+\include{contents/05_Eval}
+\end{document}

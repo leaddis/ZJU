@@ -1,0 +1,98 @@
+\documentclass[a4paper,7pt,onecolumn,oneside]{article}
+\usepackage{ctex}
+% 或
+% \usepackage{xeCJK}
+% 这部分声明需要用到的包
+\usepackage{amsmath,amsfonts,amssymb,graphicx,bm}    % EPS 图片支持
+\usepackage{mathrsfs}
+\usepackage{subfigure}   % 使用子图形
+\usepackage{amsthm}
+\usepackage{enumerate}
+
+\usepackage{geometry}
+\usepackage{balance}
+
+\usepackage{indentfirst}
+
+\usepackage{hyperref}
+
+
+\usepackage{listings}
+\usepackage{xcolor}
+\lstdefinestyle{ccstyle}{
+  language=C++, % 代码语言
+  basicstyle=\ttfamily\small, % 代码基本样式
+  keywordstyle=\color{blue}, % 关键词颜色
+  commentstyle=\color{green!60!black}, % 注释颜色
+  stringstyle=\color{red}, % 字符串颜色
+  numbers=none, % 行号位置
+  numberstyle=\tiny\color{gray}, % 行号样式
+  frame=single, % 添加框
+  framexleftmargin=5pt, % 框左侧距离代码内容的距离
+  backgroundcolor=\color{lightgray!10}, % 代码框背景颜色
+  breaklines=true, % 自动换行
+  breakatwhitespace=true, % 只在空格断行
+  showstringspaces=false, % 不显示字符串中的空格
+  captionpos=b % 标题位置：bottom
+}
+
+\begin{document}
+\section{Splines/Spline.h}
+
+\begin{itemize}
+    \item Line 23: \texttt{\#include "eigen3/Eigen/Eigen"}
+    \item Line 111: \texttt{void initialize\_common\_part(Eigen::MatrixXd \&A, Eigen::VectorXd \&rhs,}
+    \item Line 115: \texttt{void assign\_polys\_with\_M(const Eigen::VectorXd \&M, const std::vector<double> \&values);}
+    \item Line 117: \texttt{void complete(bool left, Eigen::MatrixXd \&A, Eigen::VectorXd \&rhs,}
+    \item Line 120: \texttt{void specified\_2nd(bool left, Eigen::MatrixXd \&A, Eigen::VectorXd \&rhs, double);}
+    \item Line 122: \texttt{void natural(bool left, Eigen::MatrixXd \&A, Eigen::VectorXd \&rhs);}
+    \item Line 124: \texttt{void not\_a\_knot(bool left, Eigen::MatrixXd \&A, Eigen::VectorXd \&rhs);}
+    \item Line 126: \texttt{void periodic(Eigen::MatrixXd \&A, Eigen::VectorXd \&rhs,}
+    \item Line 196: \texttt{void init\_matrix(Eigen::MatrixXd \&A, Eigen::VectorXd \&rhs, const std::vector<double> \&values);}
+\end{itemize}
+
+\section{Splines/Spline.cpp}
+
+\begin{itemize}
+    \item Line 74: \texttt{void Spline<3, SplineType::ppForm>::initialize\_common\_part(Eigen::MatrixXd \&A, Eigen::VectorXd \&rhs,}
+    \item Line 87: \texttt{void Spline<3, SplineType::ppForm>::assign\_polys\_with\_M(const Eigen::VectorXd \&M,}
+    \item Line 110: \texttt{Eigen::MatrixXd A = Eigen::MatrixXd::Zero(N, N);}
+    \item Line 113: \texttt{Eigen::VectorXd rhs = Eigen::VectorXd::Zero(N);}
+    \item Line 165: \texttt{Eigen::VectorXd M = A.lu().solve(rhs);}
+    \item Line 169: \texttt{void Spline<3, SplineType::ppForm>::complete(bool left, Eigen::MatrixXd \&A, Eigen::VectorXd \&rhs,}
+    \item Line 184: \texttt{void Spline<3, SplineType::ppForm>::specified\_2nd(bool left, Eigen::MatrixXd \&A, Eigen::VectorXd \&rhs, double d) \{}
+    \item Line 196: \texttt{void Spline<3, SplineType::ppForm>::natural(bool left, Eigen::MatrixXd \&A, Eigen::VectorXd \&rhs) \{}
+    \item Line 200: \texttt{void Spline<3, SplineType::ppForm>::not\_a\_knot(bool left, Eigen::MatrixXd \&A, Eigen::VectorXd \&rhs) \{}
+    \item Line 216: \texttt{void Spline<3, SplineType::ppForm>::periodic(Eigen::MatrixXd \&A, Eigen::VectorXd \&rhs,}
+    \item Line 461: \texttt{void Spline<3, SplineType::BSpline>::init\_matrix(Eigen::MatrixXd \&A,}
+    \item Line 462: \texttt{Eigen::VectorXd \&rhs,}
+    \item Line 465: \texttt{A = Eigen::MatrixXd::Zero(N + 2, N + 2);}
+    \item Line 466: \texttt{rhs = Eigen::VectorXd::Zero(N + 2);}
+    \item Line 484: \texttt{Eigen::MatrixXd A;}
+    \item Line 485: \texttt{Eigen::VectorXd rhs;}
+    \item Line 501: \texttt{Eigen::VectorXd res = A.lu().solve(rhs);}
+    \item Line 511: \texttt{Eigen::MatrixXd A;}
+    \item Line 512: \texttt{Eigen::VectorXd rhs;}
+    \item Line 528: \texttt{Eigen::VectorXd res = A.lu().solve(rhs);}
+    \item Line 546: \texttt{Eigen::MatrixXd A;}
+    \item Line 547: \texttt{Eigen::VectorXd rhs;}
+    \item Line 573: \texttt{Eigen::VectorXd res = A.lu().solve(rhs);}
+\end{itemize}
+
+\section{Splines/SpapiSolver.h}
+
+\begin{itemize}
+    \item Line 7: \texttt{\#include<eigen3/Eigen/Sparse>}
+    \item Line 11: \texttt{using namespace Eigen;}
+    \item Line 20: \texttt{SparseMatrix<double> M;}
+    \item Line 88: \texttt{M = SparseMatrix<double>(m, m);}
+    \item Line 90: \texttt{std::vector<Triplet<double>> tripletlist;}
+    \item Line 94: \texttt{tripletlist.push\_back(Triplet<double>(i, j, base[j].d(degree[i], x[i])));}
+    \item Line 98: \texttt{M.setFromTriplets(tripletlist.begin(), tripletlist.end());}
+    \item Line 99: \texttt{M.makeCompressed();}
+    \item Line 100: \texttt{SparseQR<SparseMatrix<double>, NaturalOrdering<int>> solver;}
+    \item Line 106: \texttt{VectorXd rhs(m);}
+    \item Line 110: \texttt{VectorXd result = solver.solve(rhs);}
+\end{itemize}
+
+\end{document}

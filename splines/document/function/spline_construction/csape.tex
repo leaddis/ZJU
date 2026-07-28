@@ -1,0 +1,80 @@
+\subsubsection{\texttt{csape}}
+
+使用\texttt{csape}函数函数时请至少输入四个插值点，更少插值点情形的功能待完善。
+
+\texttt{csape}函数根据给定的插值点列和边界条件信息生成对应的三次样条函数（ pp 格式），其返回值为一个结构体，
+包含生成的三次样条函数的节点，分片多项式系数等信息。（下文中左侧指在样条函数的第一个节点处，右侧指在最后一个节点处）
+
+\texttt{csape}函数的用法为 \texttt{S = csape(x, [e1 y e2], conds)}，其中
+\begin{itemize}
+    \item \texttt{x y} 分别为样条插值坐标点的横纵坐标构成的向量（建议将\texttt{x}进行单增排列后作为参数输入）；
+    \item \texttt{e1 e2} 分别为样条插值在左右两侧的边界条件值（根据\texttt{conds}的取值将会被理解为不同的含义，甚至被忽略）；
+    \item \texttt{conds}指定样条插值的边界条件，其值可以为字符串和$1 \times 2$ \texttt{int}类型矩阵。
+\end{itemize}
+
+
+\textbf{I.} 当不指定\texttt{conds}时，即使用\texttt{S = csape(x, y)}时，函数将默认在两侧使用 not-a-knot 边界条件，函数行为与
+\texttt{csapi}相同。
+
+\textbf{II.} 当\texttt{conds}为字符串时，其对应的取值和意义如下：
+\begin{table}[H]
+    \centering
+    \begin{tabular}{l|l}
+        \hline
+        \lstinline|"complete"| or \lstinline|"clamped"|
+         & \makecell[l]{指定样条函数左右两侧的一阶导数分别为\texttt{e1 e2}， \\若未提供\texttt{e1 e2}的输入，将会以“默认值”进行计算。}\\
+        \hline
+        \lstinline|"not-a-knot"|
+         & \makecell[l]{样条函数在第二个节点和倒数第二个节点三次连续，       \\此边界条件会忽略输入的\texttt{e1 e2}。}\\
+        \hline
+        \lstinline|"second"|
+         & \makecell[l]{指定样条函数左右两侧的二阶导数分别为\texttt{e1 e2}， \\若未提供\texttt{e1 e2}的输入，将会默认\texttt{e1 = e2 = 0},\\此情形下函数行为与
+        边界条件为 \lstinline|"variational"|时相同。}                        \\
+        \hline
+        \lstinline|"periodic"|
+         & \makecell[l]{指定样条函数左右两侧的一阶导数和二阶导数均相等，     \\此边界条件会忽略输入的\texttt{e1 e2}。}\\
+        \hline
+        \lstinline|"variational"|
+         & \makecell[l]{指定样条函数左右两侧的二阶导数均为0，                \\此边界条件会忽略输入的\texttt{e1 e2}。}\\
+        \hline
+    \end{tabular}
+\end{table}
+其他字符串内容（大小写敏感）会被认定为非法输入。“默认值”说明详见下文。
+
+\textbf{III.} 当 \texttt{conds}为$1 \times 2$ \texttt{int}类型矩阵时，矩阵元素只能取值于 0，1，2，当出现其他取值
+的矩阵元素或未指定指的矩阵元素时，函数会将对应的元素认定为 1 并以“默认值”进行计算。例如:
+
+\texttt{S = csape(x, [e1 y e2], [-1 2])} 等价于 \texttt{S = csape(x, [default y e2], [1 2])};
+
+\texttt{S = csape(x, [e1 y e2], [2 , ])} 等价于 \texttt{S = csape(x, [e1 y default], [2 ，1])}
+
+\hspace*{\fill}
+
+0，1，2取值分别对应于 \lstinline|"periodic"|，\lstinline|"complete"|，\lstinline|"second"|，意为指定两侧对应
+阶数的导数值，例如：
+
+\texttt{S = csape(x, [e1 y e2], [1 2])} 将会指定三次样条函数 \texttt{S} 左侧一阶导数为 \texttt{e1}，右侧二阶导数为 \texttt{e2}；
+
+\texttt{S = csape(x, [e1 y e2], [2 1])} 将会指定三次样条函数 \texttt{S} 左侧二阶导数为 \texttt{e1}，右侧一阶导数为 \texttt{e2}；
+
+\hspace*{\fill}
+
+\lstinline|"periodic"|边界条件即矩阵元素0不能与其他条件混用，当 \texttt{conds} 矩阵中出现 0 元素时，必须两个元素均为0，否则为0的元素
+将被视为 1 并以“默认值”进行计算。例如:
+
+\texttt{S = csape(x, [e1 y e2], [0 0])} 等价于 \texttt{S = csape(x, [e1 y e2], \lstinline{"periodic"})};
+
+\texttt{S = csape(x, [e1 y e2], [0 1])} 等价于 \texttt{S = csape(x, [default y e2], [1 1])};
+
+\texttt{S = csape(x, [e1 y e2], [2 0])} 等价于 \texttt{S = csape(x, [e1 y default], [2 1])};
+
+\hspace*{\fill}
+
+关于“默认值”的说明： 当函数输入参数错误或者不足时，函数会自动启动默认值计算。以左侧为例，默认计算指将样条函数左侧的一阶导数值设定为
+前四个插值点唯一确定的三次多项式在第一个节点处的一阶导数值，右侧同理。
+
+（\textcolor{red}{\kaishu 其实这里将矩阵元素0对应周期边界条件是不合适的：首先，因为已经可以通过字符串的形式设定周期边界条件，再将0对应周期边界条件
+    是一种重复。其次，矩阵形式的边界条件指定方式本意是取混合边界条件，即两侧边界条件不同，但是周期边界条件本身不能与其他边界条件混用，仍将其用矩阵元素表示
+    是和数学理论的不对应，也会带来编程实现上的不自然。最后，因为将0对应到了周期边界条件，not-a-knot 边界条件将无法同其他边界条件混合使用，若要使用
+    not-a-knot 边界条件，将只能两端同时为之，这是函数功能上的一种缺失。
+    将矩阵元素0对应到 not-a-knot 边界条件是最自然清晰的选择，但是这里软件开发一个要求是与MATLAB兼容，这是不得不做出的权衡和让步。}）

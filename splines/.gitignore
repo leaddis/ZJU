@@ -1,0 +1,52 @@
+# 忽略部分开发环境下的冗余文件
+.DS_Store
+
+# 忽略所有的.o和.a文件
+*.[oa]
+
+#忽略.out文件
+*.out
+
+#忽略临时文件
+*.swp
+*.swo
+
+#忽略latex编译中间文件
+*.aux
+*.bbl
+*.blg
+*.idx
+*.ind
+*.lof
+*.lot
+*.toc
+*.acn
+*.acr
+*.alg
+*.glg
+*.glo
+*.gls
+*.fls
+*.log
+*.fdb_latexmk
+*.snm
+*.synctex
+*.synctex.gz
+*.nav
+*.vrb
+*.xdv
+
+
+# .ycm_extra_conf.py
+.ycm_extra_conf.py
+
+# build
+build/*
+cmake-build-debug/*
+cmake-build-release/*
+
+# deps
+deps/*
+
+#更新.gitignore文件后, 请执行下列命令 
+#git config core.excludesfile .gitignore

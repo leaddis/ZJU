@@ -1,0 +1,61 @@
+\cleardoublestylepage{common}
+
+\section{绪论}
+
+\subsection{研究背景与重要意义}
+参数化偏微分方程 (PDE) 广泛出现在热传导、流体力学、电磁场以及多物理场耦合等问题中.在工程设计与科学计算中，常面临所谓的 many-query 场景：需要在大量不同参数下反复求解同一族方程，例如参数识别、优化设计、不确定性量化等~\cite{hesthaven2015,patera_rozza}.采用有限元方法 (FEM) 离散后，得到的大规模代数系统 $A(\mu)u_h(\mu)=f(\mu)$ 维数 $N$ 通常很大，单次求解已属昂贵；若对每个参数点独立求解，总成本难以承受.
+
+缩减基 (Reduced Basis, RB) 方法通过构造低维子空间 $V_r\in\mathbb{R}^{N\times r}$ ($r\ll N$) 将高维系统投影至该子空间，获得降阶模型：
+\begin{equation}
+V_r^{\mathrm T} A(\mu) V_r a(\mu)=V_r^{\mathrm T} f(\mu),
+\label{eq:rb}
+\end{equation}
+从而在在线阶段实现极快求解~\cite{hesthaven2015}.
+
+\subsection{从 Batch SVD 到增量 SVD 的必要性}
+
+缩减基方法的核心思想是将高维有限元解空间投影到一个低维子空间上，从而大幅降低求解规模.具体而言，对于参数化 PDE 离散后得到的代数系统 \(A(\mu)u_h(\mu)=f(\mu)\)，若已知一组基向量 \(V_r\in\mathbb{R}^{N\times r}\)（\(r\ll N\)），则近似解可表示为 \(u_h(\mu)\approx V_r a(\mu)\).代入原方程并施加 Galerkin 投影，得到降阶模型：
+\begin{equation}
+V_r^{\mathrm T} A(\mu) V_r a(\mu)=V_r^{\mathrm T} f(\mu),
+\label{eq:rom}
+\end{equation}
+其中系数矩阵的规模仅为 \(r\times r\)，在线求解速度极快.因此，投影降阶的核心问题转化为：如何构造一个最优的低维子空间 \(V_r\)，使得对所有感兴趣参数 \(\mu\)，投影误差 \(\|u_h(\mu)-V_r V_r^{\mathrm T}u_h(\mu)\|\) 足够小.
+
+构造该子空间最常用的方法为本征正交分解（POD）.给定一组快照（snapshots）\(\{u_h(\mu_i)\}_{i=1}^m\)，将其排列为快照矩阵 \(U=[u_h(\mu_1),\dots,u_h(\mu_m)]\in\mathbb{R}^{N\times m}\).对 \(U\) 执行奇异值分解 \(U=\Phi\Sigma\Psi^{\mathrm T}\)，取前 \(r\) 个左奇异向量组成 \(V_r=\Phi(:,1:r)\).POD 保证在 Frobenius 范数意义下，\(V_r\) 是所有秩 \(r\) 子空间中对快照集逼近最优的.
+
+然而，经典（批处理）SVD 要求事先收集全部 \(m\) 个快照才能一次性分解，这在实际应用中面临三大瓶颈：
+\begin{enumerate}
+    \item \textbf{计算负担重：} 对 \(U\in\mathbb{R}^{N\times m}\) 进行 SVD 的复杂度为 \(\mathcal{O}(N m^2)\)（若 \(N\ge m\)），当快照数 \(m\) 或自由度 \(N\) 较大时难以承受；
+    \item \textbf{内存开销高：} 必须同时存储所有历史快照，内存需求随 \(m\) 线性增长，对于大规模 PDE 或大量采样点极易耗尽内存；
+    \item \textbf{不适应流式生成：} 在参数空间的贪婪采样、自适应加密或实时数据同化中，快照是按顺序逐个获得的（\(U_{\ell+1}=[U_\ell\;u_{\ell+1}]\)）.批处理模式只能等待全部数据就绪，无法利用已有分解结果进行增量更新.
+\end{enumerate}
+
+为解决上述问题，增量奇异值分解（Incremental SVD, ISVD）应运而生.它能够在已有 SVD 分解 \(U_\ell \approx \Phi_\ell \Sigma_\ell \Psi_\ell^{\mathrm T}\) 的基础上，当新快照 \(u_{\ell+1}\) 加入时，仅以 \(\mathcal{O}(N r^2)\) 甚至更低的代价将分解更新到 \(U_{\ell+1}\).相比从头计算 SVD，ISVD 不仅显著降低了计算和存储需求，还天然适配快照逐步生成的流程.因此，研究高效、数值稳定的增量 SVD 算法，对于构建可扩展的缩减基方法具有重要的理论意义和工程价值.
+
+\subsection{加权核心 SVD }
+由于快照来自有限元离散，其内积自然采用加权形式：
+\begin{equation}
+\langle u,v\rangle_W = u^{\mathrm T} W v,\qquad W=M\quad (\text{质量矩阵}) \text{ 或 } W=K\ (\text{刚度矩阵}),
+\end{equation}
+而非标准欧几里得内积.为与连续问题中的能量结构一致，须采用核心 SVD (core SVD)：
+\begin{equation}
+U = Q \Sigma R^{\mathrm T},\quad Q^{\mathrm T}WQ=I,\quad R^{\mathrm T}R=I,
+\end{equation}
+其中 $\Sigma=\operatorname{diag}(\sigma_1,\dots,\sigma_r)$ 且 $\sigma_1\ge\cdots\ge\sigma_r>0$~\cite{fareed2018}.当 $W=I$ 时退化为标准 SVD.忽略加权内积会导致提取的基在物理能量意义下不正交，降阶模型可能失效.
+
+\subsection{本文主要工作与创新点}
+
+本文立足于参数化偏微分方程模型降阶的实际需求，围绕增量奇异值分解（ISVD）的数值稳定性与计算效率展开系统研究.
+
+首先，完整复现了加权 core SVD 框架与 Brand 经典增量算法，通过数值实验揭示了其正交性随更新次数累积而迅速退化的本质原因——小正交矩阵连乘导致的舍入误差放大.
+在此基础上，深入分析了 Zhang (2022) 改进算法的数学机制，阐释了其如何通过累积更新策略从根本上避免矩阵连乘，进而回答了 Brand 于 2006 年提出的关于重正交化频率的开放问题.
+为了验证理论分析的有效性，本文在 1D 和 2D 参数化椭圆型 PDE 上开展了系统性的数值实验，全面对比了批次 POD、经典 Brand ISVD 与 Zhang 改进 ISVD 在降阶精度、加权正交性、离线构基时间以及峰值内存占用等方面的表现.
+实验结果表明，改进的 ISVD 能够在不依赖频繁重正交化的前提下，长期保持加权正交性稳定，同时大幅压缩内存开销并提升离线计算效率.
+这些工作为大规模 many-query 场景下的 PDE 降阶提供了一套兼具数值稳健性与计算经济性的可行方案.
+
+本文的主要工作与贡献如下：
+\begin{enumerate}
+    \item 在加权内积框架下，完整实现了 core SVD 的 batch 版本和 Brand 经典增量算法.通过数值实验发现：当快照数超过 400 时，Brand 算法的加权正交性误差 \( \|I - Q^T WQ\|_F \) 从 \( 10^{-15} \) 急剧恶化至 \( 10^1 \)，导致截断策略失效.
+    \item 复现并分析了 Zhang (2022) 的改进算法，揭示了“累积更新”避免小正交矩阵连乘的数学机制.实验表明，在相同条件下，改进算法的正交性误差始终保持在 \( 10^{-8} \) 以下.
+    \item 在 2D 参数化椭圆型 PDE（自由度 \( N = 3600 \)，快照数 \( m = 1000 \)）上，改进 iSVD 的峰值内存从 batch 模式的 35.10 MB 降至 2.16 MB（压缩 16.2 倍）.
+\end{enumerate}

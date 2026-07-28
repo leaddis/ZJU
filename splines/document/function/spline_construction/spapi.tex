@@ -1,0 +1,77 @@
+\subsubsection{\texttt{spapi}}
+
+根据给定的 B 样条节点或样条曲线阶数以及插值条件创建一个 B 格式的样条曲线。
+
+\begin{itemize}
+    \item \texttt{s = spapi(knots,x,y)} 创建一个样条曲线。
+          \begin{itemize}
+              \item \texttt{knots} 为 B 样条的节点。
+              \item \texttt{x} 为插值条件节点，服从单增序列要求，可以重复。
+              \item \texttt{y} 为上述插值条件节点上的值，如有重复，重复的值被分别视为在该点处的$1, 2, \cdots$阶导数值。
+              \item \texttt{x,y} 必须为长度相同的一维向量。
+              \item 返回的 \texttt{s} 的阶数 \texttt{k} 满足 \texttt{k = length(knots) - length(x)}.
+          \end{itemize}
+    \item \texttt{s = spapi(k,x,y)} 创建一个 \texttt{k} 阶样条曲线。
+          \begin{itemize}
+              \item \texttt{x,y} 为插值条件，要求与 \texttt{s = spapi(knots,x,y)} 相同。
+              \item 返回的 \texttt{s} 是满足插值条件与指定 B 样条节点或指定阶数的样条曲线，为 B 格式。
+          \end{itemize}
+\end{itemize}
+
+\textbf{I.} 在 B 样条节点 ${0, 0, 0, 0, 1, 2, 2, 2, 2}$ 上进行 B 样条插值，插值条件为 $s(0)=2,s(1) = 0,s'(1) = 1,s''(1) = 2,s(2) = −1.$
+
+即输入：
+
+\begin{lstlisting}[language=matlab]
+        knots = [0, 0, 0, 0, 1, 2, 2, 2, 2];
+        x = [0, 1, 1, 1, 2];
+        y = [2, 0, 1, 2, -1];
+        s = spapi(knots, x, y);
+\end{lstlisting}
+
+输出为：
+
+\begin{lstlisting}
+          form : 'B-'
+         knots : [0 0 0 0 1 2 2 2 2]
+         coefs : [2 -0.3333 -0.3333 1.0000 -1]
+        number : 5
+         order : 4
+           dim : 1
+\end{lstlisting}
+
+\textbf{II.} 在 $[0, 4]$ 上对函数 $f(x) = \sin(x)$ 进行 5 次 B 样条拟合，采样点为区间上均匀分布 的 41 个点
+0, 0.1, 0.2, ···, 3.9, 4。
+
+即输入：
+\begin{lstlisting}[language=matlab]
+        x = 0:0.1:4;
+        s = spapi(6, x, sin(x));
+\end{lstlisting}
+
+输出为：
+\begin{lstlisting}
+          form : 'B-'
+         knots : [0 0 0 0 0 0 0.3000 0.4000 0.5000 0.6000 0.7000 0.8000 … ]
+         coefs : [0 0.0600 0.1400 0.2390 0.3543 0.4806 0.5661 0.6458 … ]
+        number : 41
+         order : 6
+           dim : 1
+\end{lstlisting}
+
+\textbf{实现说明}
+\begin{itemize}
+    \item \texttt{s = spapi(knots, x, y)}
+    \begin{itemize}
+        \item 相容性检查（尚未完全实现）
+        \item 样条插值。只需要对\texttt{x}前后各扩充$k-1$个节点，由于目标样条函数可以被线性组合$\sum \alpha_j B_j$的方式表达，而$B_j$以及重节点情形下$B_j^{(n)}$都是可以被显式表达的，问题转化为求解系数$\alpha_j$。其中，以$\alpha_j$为自变量的这一系列方程组的系数矩阵的各行表示各$j$情形下$B_j$或者其导数在各节点处的取值，右端项为对应的已知值$y_j$，它们是稀疏的，Matlab的官方文档给出的求解方式是「调用spcol来提供几乎块对角线搭配矩阵$(B_{j,k}(x))$，slvblk使用块QR分解求解线性系统」。
+    \end{itemize}
+    \item \texttt{s = spapi(k, x, y)}
+    \begin{itemize}
+        \item 实现\texttt{knots = augknt(knots, k)}：将\texttt{knots(begin)}和\texttt{knots(end)}各重复k遍，例如\texttt{augknt([1,2,3],2)}，输出\texttt{[1,1,2,3,3]}。只需读取参数Vector，对将返回的临时Vector遍历赋值时，在\texttt{[0]}和\texttt{[v.size()+k-2]}处使用\texttt{for}循环填入需重复的数据即可。
+        \item 实现\texttt{knots = aveknt(knots, k)}：将\texttt{knots}去掉头尾元素后，对每$k-1$个元素取平均数构成新的\texttt{knots}。只需嵌套双层循环，外层遍历参数Vector的\texttt{[1]}至\texttt{[v.size()-k+1]}，内层循环累加这$k-1$个数并取平均值，赋值于将要返回的临时Vector即可。
+        \item 实现\texttt{knots = aptknt(tau, k)}：即调用\texttt{augknt([tau(1), aveknt(tau,k), tau(end)], k)}.
+        \item 调用\texttt{s = spapi(aptknt(x, k), x, y)}，即可得到结果。
+    \end{itemize}
+\end{itemize}
+

@@ -1,0 +1,11 @@
+{
+    "name": "CurveFitting",
+    "version": "@PROJECT_VERSION@",
+    "Bversion": ">=3.0",
+    "author": "浙江大学",
+    "description": "曲线拟合工具箱，目前实现了样条插值的功能。浙江大学研发团队开发。",
+    "license": "custom",
+    "icon": "",
+    "release_date": "2024.7.30",
+    "depends": []
+}

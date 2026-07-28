@@ -1,0 +1,346 @@
+\documentclass[a4paper]{article}
+\usepackage[affil-it]{authblk}
+\usepackage[english]{babel}
+\usepackage[backend=bibtex,style=numeric]{biblatex}
+
+\usepackage{geometry}
+\geometry{margin=1.5cm, vmargin={0pt,1cm}}
+\setlength{\topmargin}{-1cm}
+\setlength{\paperheight}{29.7cm}
+\setlength{\textheight}{25.3cm}
+
+% useful packages.
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}     
+\usepackage{enumerate} %enumerate environment
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{fancyhdr}
+\usepackage{layout}
+\usepackage{ctex}      %中文环境
+\usepackage{booktabs}  %三线表
+\usepackage{verbatim}  %comment environment
+\usepackage{float}     %强制表格图片位置
+\usepackage{listings}  %insert code in latex
+\usepackage{fontspec}  %font support
+\usepackage{tikz}
+\usepackage{makecell}
+\usetikzlibrary{intersections}
+\usepackage{arydshln}
+
+\usepackage[colorlinks,linkcolor=blue]{hyperref}
+\usepackage{xcolor}
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{lightgrey}{rgb}{0.95,0.95,0.95}
+\definecolor{winered}{rgb}{0.5,0,0}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\lstset{
+      backgroundcolor=\color{lightgrey},
+      basicstyle             = \ttfamily,
+      breakatwhitespace      = false,
+      breaklines             = true,
+      captionpos             = none,
+      commentstyle           = \color{mygreen}\bfseries,
+      extendedchars          = false,
+      keepspaces             = true,
+      keywordstyle           = \color{winered},         % keyword style
+      language               = C++,                     % the language of code
+      otherkeywords          = {string},
+      numberstyle            = \tiny\color{mygray},
+      rulecolor              = \color{black},
+      showspaces             = false,
+      showstringspaces       = false,
+      showtabs               = false,
+      stepnumber             = 1,
+      stringstyle            = \color{mymauve},         % string literal style
+      tabsize                = 2,
+      title                  = \lstname,
+      aboveskip              = 0pt,
+      belowskip              = 0pt,
+      columns                = flexible
+}
+
+% some common command
+\newcommand{\dif}{\mathrm{d}}
+\newcommand{\avg}[1]{\left\langle #1 \right\rangle}
+\newcommand{\norm}[1]{\left\| #1 \right\|}
+\newcommand{\difFrac}[2]{\frac{\dif #1}{\dif #2}}
+\newcommand{\pdfFrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\OFL}{\mathrm{OFL}}
+\newcommand{\UFL}{\mathrm{UFL}}
+\newcommand{\fl}{\mathrm{fl}}
+\newcommand{\op}{\odot}
+\newcommand{\Eabs}{E_{\mathrm{abs}}}
+\newcommand{\Erel}{E_{\mathrm{rel}}}
+\addbibresource{citation.bib}
+
+\begin{document}
+% =================================================
+\title{Quantum information and quantum computation homework 2}
+
+\author{Zhouyue Qian 3220104074
+  \thanks{Electronic address: \texttt{3220104074@edu.zju.cn}}}
+\affil{(Information and Computational Science Class 2201), Zhejiang University }
+
+
+\date{Due time: \today}
+
+\maketitle
+
+%\begin{abstract}
+%    The abstract is not necessary for the theoretical homework, 
+%    but for the programming project, 
+%    you are encouraged to write one.      
+%\end{abstract}
+
+\section{3SAT to SAT}
+\subsection*{Proof}
+We aim to prove that \textbf{3SAT} is reducible to \textbf{SAT}. The following steps outline the proof:
+
+1. \textbf{Definition of 3SAT}:  
+   3SAT is a restricted version of the SAT problem where each clause contains exactly three literals. For example:
+   \[
+   \phi = (x_1 \lor \neg x_2 \lor x_3) \land (\neg x_4 \lor x_5 \lor x_6).
+   \]
+
+2. \textbf{Definition of SAT}:  
+   SAT is the general Boolean satisfiability problem, where each clause can have any number of literals.
+
+3. \textbf{Goal}:  
+   To show that 3SAT is reducible to SAT, we need to transform any instance of 3SAT into an equivalent SAT formula in polynomial time.
+
+4. \textbf{Reduction}:  
+   The transformation from 3SAT to SAT is trivial since every 3SAT formula is already in conjunctive normal form (CNF), which is a valid form for SAT.  
+   Since SAT allows clauses of any length, a formula with clauses containing exactly three literals is directly interpretable as a SAT formula without any modifications.
+
+5. \textbf{Preservation of Satisfiability}:  
+   A 3SAT formula \( \phi \) and its corresponding SAT formula \( \phi' \) are identical. Therefore:  
+   - If \( \phi \) is satisfiable in 3SAT, then \( \phi' \) is satisfiable in SAT.  
+   - If \( \phi \) is unsatisfiable in 3SAT, then \( \phi' \) is unsatisfiable in SAT.
+
+6. \textbf{Complexity}:  
+   The transformation involves no structural changes and is thus computable in linear time relative to the size of the input formula.
+
+7. \textbf{Conclusion}:  
+   Since 3SAT is a special case of SAT, every instance of 3SAT is reducible to SAT in polynomial time.
+\section{SAT to 3SAT}
+\subsection*{Introduction}
+
+To prove the correctness of the reduction from SAT to 3SAT, we need to show that the transformation preserves satisfiability. Specifically, for each clause \( C \) in the original SAT formula \( \phi \), the replacement clauses in the 3SAT formula \( \phi' \) are constructed such that \( \phi \) is satisfiable if and only if \( \phi' \) is satisfiable.
+
+The reduction handles clauses of different lengths separately:
+\begin{itemize}
+    \item Clauses with one literal (Case 1)
+    \item Clauses with two literals (Case 2)
+    \item Clauses with exactly three literals (Case 3)
+    \item Clauses with more than three literals (Case 4)
+\end{itemize}
+
+We will go through each case, explain the replacement, and prove that the satisfiability is preserved.
+
+\subsection*{Case 1: Clause with One Literal}
+
+\textbf{Original Clause:}
+
+Let \( C = \ell \), where \( \ell \) is a literal (either \( x_i \) or \( \neg x_i \)).
+
+\textbf{Replacement Clauses:}
+
+Introduce two new variables \( z_1 \) and \( z_2 \), and replace \( C \) with the following four clauses:
+\begin{align*}
+    (\ell \lor z_1 \lor z_2), \\
+    (\ell \lor \neg z_1 \lor z_2), \\
+    (\ell \lor z_1 \lor \neg z_2), \\
+    (\ell \lor \neg z_1 \lor \neg z_2).
+\end{align*}
+
+\textbf{Proof of Equivalence:}
+
+The logical AND of these four clauses is equivalent to \( \ell \).
+\begin{itemize}
+    \item If \( \ell \) is \textbf{True}, all four clauses are \textbf{True} regardless of the values of \( z_1 \) and \( z_2 \).
+    \item If \( \ell \) is \textbf{False}, we need to satisfy all clauses with \( \ell = \text{False} \). The clauses become:
+\begin{align*}
+    (\text{False} \lor z_1 \lor z_2), \\
+    (\text{False} \lor \neg z_1 \lor z_2), \\
+    (\text{False} \lor z_1 \lor \neg z_2), \\
+    (\text{False} \lor \neg z_1 \lor \neg z_2).
+\end{align*}
+These clauses represent all possible combinations of \( z_1 \) and \( z_2 \), meaning at least one clause will be \textbf{False} regardless of how \( z_1 \) and \( z_2 \) are assigned.
+\end{itemize}
+
+\textbf{Conclusion:} The replacement preserves satisfiability. The new formula is satisfiable if and only if the original clause \( \ell \) is satisfiable.
+
+\subsection*{Case 2: Clause with Two Literals}
+
+\textbf{Original Clause:}
+
+Let \( C = \ell_1 \lor \ell_2 \), where \( \ell_1 \) and \( \ell_2 \) are literals.
+
+\textbf{Replacement Clauses:}
+
+Introduce one new variable \( z_1 \), and replace \( C \) with the following two clauses:
+\begin{align*}
+    (\ell_1 \lor \ell_2 \lor z_1), \\
+    (\ell_1 \lor \ell_2 \lor \neg z_1).
+\end{align*}
+
+\textbf{Proof of Equivalence:}
+
+The logical AND of these two clauses is equivalent to \( \ell_1 \lor \ell_2 \).
+\begin{itemize}
+    \item If \( \ell_1 \lor \ell_2 \) is \textbf{True}, both clauses are \textbf{True} regardless of \( z_1 \).
+    \item If \( \ell_1 \lor \ell_2 \) is \textbf{False}, then \( \ell_1 \) and \( \ell_2 \) are both \textbf{False}. The clauses become:
+    \begin{align*}
+        (\text{False} \lor z_1), \\
+        (\text{False} \lor \neg z_1).
+    \end{align*}
+    This reduces to \( z_1 \) and \( \neg z_1 \), which cannot both be \textbf{True} simultaneously.
+\end{itemize}
+
+\textbf{Conclusion:} The replacement preserves satisfiability. The new formula is satisfiable if and only if the original clause \( C \) is satisfiable.
+
+\subsection*{Case 3: Clause with Exactly Three Literals}
+
+\textbf{Action:} Leave the clause unchanged.
+
+\textbf{Conclusion:} No change is necessary, and satisfiability is trivially preserved.
+
+\subsection*{Case 4: Clause with More Than Three Literals}
+
+\textbf{Original Clause:}
+
+Let \( C = \ell_1 \lor \ell_2 \lor \ell_3 \lor \ldots \lor \ell_k \), where \( k > 3 \) and each \( \ell_i \) is a literal.
+
+\textbf{Replacement Clauses:}
+
+Introduce \( k - 3 \) new variables \( z_1, z_2, \ldots, z_{k-3} \), and replace \( C \) with the following \( k - 2 \) clauses:
+\begin{align*}
+    (\ell_1 \lor \ell_2 \lor z_1), \\
+    (\ell_3 \lor \neg z_1 \lor z_2), \\
+    (\ell_4 \lor \neg z_2 \lor z_3), \\
+    \vdots \\
+    (\ell_{k-2} \lor \neg z_{k-4} \lor z_{k-3}), \\
+    (\ell_{k-1} \lor \ell_k \lor \neg z_{k-3}).
+\end{align*}
+
+\textbf{Objective:} Prove the following statements:
+\begin{enumerate}
+    \item \textbf{Statement 1}:If there exists an assignment to \( x_1, \ldots, x_n \) such that \( C \) is \textbf{True}, then there exists an assignment to \( z_1, \ldots, z_{k-3} \) such that all replacement clauses are \textbf{True}.
+    \item \textbf{Statement 2}:If, for a given assignment to \( x_1, \ldots, x_n \), \( C \) is \textbf{False}, then for any assignment to \( z_1, \ldots, z_{k-3} \), at least one of the replacement clauses is \textbf{False}.
+\end{enumerate}
+
+\subsection*{Proof of Statement 1:}
+
+\textbf{Assumption:} There exists an assignment to \( x_1, \ldots, x_n \) such that \( C = \ell_1 \lor \ell_2 \lor \ldots \lor \ell_k \) is \textbf{True}.
+
+\textbf{Objective:} Find an assignment to \( z_1, \ldots, z_{k-3} \) such that all replacement clauses are \textbf{True}.
+
+\textbf{Proof:}
+Since \( C \) is \textbf{True}, at least one of the literals \( \ell_1, \ldots, \ell_k \) is \textbf{True}.
+
+\textbf{Case A:} If any of \( \ell_1 \) or \( \ell_2 \) is \textbf{True}.
+\begin{itemize}
+    \item Then, the first clause \( (\ell_1 \lor \ell_2 \lor z_1) \) is \textbf{True} regardless of \( z_1 \).
+    \item Assign \( z_1 \) arbitrarily.
+    \item Proceed recursively with the rest of the clauses.
+\end{itemize}
+
+\textbf{Case B:} If \( \ell_1 \) and \( \ell_2 \) are \textbf{False}, but \( \ell_i \) is \textbf{True} for some \( i \geq 3 \).
+
+Let \( j \) be the smallest index \( \geq 3 \) such that \( \ell_j \) is \textbf{True}.
+
+Assign \( z_1, z_2, \ldots, z_{j-3} \) such that:
+\begin{itemize}
+    \item For \( t = 1 \) to \( j - 3 \), set \( z_t = \text{False} \).
+    \item This makes \( \neg z_{t-1} = \text{True} \) (for \( t \geq 2 \)), satisfying the clauses.
+\end{itemize}
+
+The clause \( (\ell_j \lor \neg z_{j-3} \lor z_{j-2}) \) (if \( j < k \)) or \( (\ell_{k-1} \lor \ell_k \lor \neg z_{k-3}) \) (if \( j = k \)) will be satisfied because \( \ell_j \) is \textbf{True}.
+
+For \( t = j - 2 \) to \( k - 3 \), assign \( z_t \) arbitrarily (if any).
+
+\subsubsection*{Example for Clarity}
+
+Suppose \( k = 6 \), literals are \( \ell_1, \ell_2, \ell_3, \ell_4, \ell_5, \ell_6 \).
+
+Suppose \( \ell_4 \) is \textbf{True}, and \( \ell_1, \ell_2, \ell_3 \) are \textbf{False}.
+
+\begin{itemize}
+    \item Assign \( z_1 = \text{False} \), so \( \neg z_1 = \text{True} \).
+    \item The second clause \( (\ell_3 \lor \neg z_1 \lor z_2) \) is satisfied since \( \neg z_1 = \text{True} \).
+    \item Assign \( z_2 = \text{False} \), so \( \neg z_2 = \text{True} \).
+    \item The third clause \( (\ell_4 \lor \neg z_2 \lor z_3) \) is satisfied because \( \ell_4 = \text{True} \).
+\end{itemize}
+
+\textbf{Conclusion:} By appropriately assigning \( z_i \), we can ensure all clauses are \textbf{True} when \( C \) is \textbf{True}.
+
+\subsection*{Proof of Statement 2}
+
+Since \( C \) is \textbf{False}, all \( \ell_i \) are \textbf{False}.
+
+We will show that the clauses form a chain of dependencies that cannot be satisfied when all \( \ell_i \) are \textbf{False}.
+
+\begin{itemize}
+    \item \textbf{First Clause:} \( (\ell_1 \lor \ell_2 \lor z_1) \)
+        \begin{itemize}
+            \item Since \( \ell_1 \) and \( \ell_2 \) are \textbf{False}, the clause reduces to \( (z_1) \).
+        \end{itemize}
+    \item \textbf{Second Clause:} \( (\ell_3 \lor \neg z_1 \lor z_2) \)
+        \begin{itemize}
+            \item Since \( \ell_3 \) is \textbf{False}, the clause reduces to \( (\neg z_1 \lor z_2) \).
+        \end{itemize}
+    \item \textbf{Third Clause:} \( (\ell_4 \lor \neg z_2 \lor z_3) \)
+        \begin{itemize}
+            \item Since \( \ell_4 \) is \textbf{False}, the clause reduces to \( (\neg z_2 \lor z_3) \).
+        \end{itemize}
+    \item \(\vdots\)
+    \item \textbf{Last Clause:} \( (\ell_{k-1} \lor \ell_k \lor \neg z_{k-3}) \)
+        \begin{itemize}
+            \item Since \( \ell_{k-1} \) and \( \ell_k \) are \textbf{False}, the clause reduces to \( (\neg z_{k-3}) \).
+        \end{itemize}
+\end{itemize}
+
+Now, we can derive a contradiction:
+
+\begin{itemize}
+    \item From the first clause, \( z_1 \) must be \textbf{True}.
+    \item From the second clause, since \( z_1 = \text{True} \), \( \neg z_1 = \text{False} \), so \( z_2 \) must be \textbf{True}.
+    \item From the third clause, \( z_2 = \text{True} \) implies \( \neg z_2 = \text{False} \), so \( z_3 \) must be \textbf{True}.
+    \item Continue this pattern up to \( z_{k-3} \).
+    \item From the last clause, \( \neg z_{k-3} \) must be \textbf{True}, so \( z_{k-3} \) must be \textbf{False}.
+\end{itemize}
+
+\textbf{Contradiction:} \( z_{k-3} = \text{True} \) and \( z_{k-3} = \text{False} \).
+
+\textbf{Conclusion:} It's impossible to assign values to \( z_1, \ldots, z_{k-3} \) to satisfy all clauses when all \( \ell_i \) are \textbf{False}. Therefore, the conjunction of the replacement clauses is \textbf{False}.
+
+
+\subsection*{Overall Conclusion}
+
+The reduction from SAT to 3SAT preserves satisfiability for each clause:
+
+\begin{itemize}
+    \item If a clause \( C \) is \textbf{True} under some assignment, the replacement clauses can be satisfied by extending the assignment to the new variables.
+    \item If a clause \( C \) is \textbf{False} under some assignment, the replacement clauses cannot be satisfied, regardless of how the new variables are assigned.
+\end{itemize}
+
+By applying this transformation to each clause in \( \phi \), we ensure that the overall formula \( \phi' \) is satisfiable if and only if \( \phi \) is satisfiable.
+
+
+Now the proof is completed.$\Box$
+\end{document}
+
+
+
+
+% ============================================
+
+% ===============================================
+%\section*{ \center{\normalsize {Acknowledgement}} }
+%\printbibliography
+
+
+\end{document}
