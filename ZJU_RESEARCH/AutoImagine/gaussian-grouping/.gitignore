@@ -1,8 +1,0 @@
-data/*
-output/*
-Tracking-Anything-with-DEVA/example/*
-submodules/diff-gaussian-rasterization-cp/*
-*.pyc
-*.pth
-*.jpg
-*.png
